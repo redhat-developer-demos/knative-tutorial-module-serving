@@ -1,0 +1,7 @@
+name: knative-tutorial-basics
+title: Introduction to Knative
+version: 0.5.0
+nav:
+  - modules/ROOT/nav.adoc
+
+start_page: ROOT:index.adoc
