@@ -23,9 +23,7 @@ copyToClipboard::setup-minikube-start[]
 <3> Minimum Kubernetes version needs to be 1.12, refer to issue https://github.com/knative/serving/issues/3067 for more details.
 <4> On macOS. On Linux, please use `--vm-driver=kvm2`
 
-
-[#install-knative-istio]
-.**Install Istio**
+**Install Istio**
 
 [#run-install-istio]
 [source,bash,subs="+macros,+attributes"]
@@ -69,8 +67,8 @@ istio-sidecar-injector-6977b5cf5b-9wsjw    1/1     Running     0          6h35m
 istio-telemetry-7676df547f-55p6c           2/2     Running     0          6h35m
 ----
 
-[#install-knative-serving]
-.**Install Knative Serving**
+
+**Install Knative Serving**
 
 [#run-install-knative-serving]
 [source,bash,subs="+macros,+attributes"]
@@ -104,8 +102,8 @@ controller-66cd7d99df-6lt2t   1/1     Running   0          6h33m
 webhook-6d9568d-htxlt         1/1     Running   0          6h33m
 ----
 
-[#install-knative-build]
-.**Install Knative Build** 
+
+**Install Knative Build** 
 
 [#run-install-knative-build]
 [source,bash,subs="+macros,+attributes"]
@@ -137,8 +135,8 @@ build-controller-658d64d9bd-4m7l9   1/1     Running   0          6h32m
 build-webhook-6bb747665f-trjxg      1/1     Running   0          6h32m
 ----
 
-[#install-knative-eventing]
-.**Install Knative Eventing** 
+
+**Install Knative Eventing** 
 
 [#run-install-knative-eventing]
 [source,bash,subs="+macros,+attributes"]
@@ -161,7 +159,8 @@ kubectl -n knative-sources get pods -w
 ----
 copyToClipboard::setup-watch-knative-sources-pods[]
 
-.Eventing
+**Eventing**
+
 [#setup-watch-knative-eventing-pods]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -193,8 +192,7 @@ NAME                   READY   STATUS    RESTARTS   AGE
 controller-manager-0   1/1     Running   0          6h35m
 ----
 
-[#set-knative-tutorial-ns]
-.**Configuring Kubernetes namespace**
+**Configuring Kubernetes namespace**
 
 We will use a non default Kubernetes namespace called `{tutorial-namespace}` for all the tutorial exercises.
 
