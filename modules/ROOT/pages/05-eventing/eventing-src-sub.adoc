@@ -76,9 +76,8 @@ The event source listens to external events e.g. a kafka topic or for a file on 
 
 [#eventing-create-event-source]
 === Create Event Source
-[.text-center]
 .link:{github-repo}/{eventing-repo}/knative/event-source.yaml[event-source.yaml]
-[source,yaml,linenums]
+[source,yaml,subs="+macros,+attributes"]
 ----
 apiVersion: sources.eventing.knative.dev/v1alpha1
 kind: CronJobSource #<1>
@@ -154,9 +153,8 @@ The event subscription is responsible of connecting the channel(sink) with the s
 
 [#eventing-create-subscriber]
 === Create Channel Subscriber
-[.text-center]
 .link:{github-repo}/{eventing-repo}/knative/channel-subscriber.yaml[channel-subscriber.yaml]
-[source,yaml,linenums]
+[source,yaml,subs="+macros,+attributes"]
 ----
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Subscription
@@ -249,9 +247,8 @@ yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.containe
 ----
 copyToClipboard::eventing-run-create-service[]
 
-[.text-center]
-.service.yaml
-[source,yaml,linenums]
+.service.yaml 
+[source,yaml,subs="+macros,+attributes"]
 ----
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
@@ -271,11 +268,11 @@ spec:
 
 <1> Set from `pass:[${DESTINATION_IMAGE_NAME}]` environment variable --  the fully qualified container image that will be pushed to the registry as part of the build --
 
-Refer to xref:ROOT:{build-repo}/build.adoc#build-set-env[Build Environment Variables]
+Refer to xref:knative-tutorial-build:ROOT:build.adoc#build-set-env[Build Environment Variables]
 
 [NOTE,subs="macros+"]
 ====
-If you have skipped the xref:ROOT:{build-repo}/build.adoc[Build] or xref:ROOT:{build-repo}/build-templates.adoc[Build Templates] do not have the container image of `event-greeter`; then you can update the Knative serving service to use the pre-built event-greeter image available at `quay.io/rhdevelopers/knative-tutorial-event-greeter:0.0.1`
+If you have skipped the xref:knative-tutorial-build:ROOT:build.adoc[Build] or xref:knative-tutorial-build:ROOT:build-templates.adoc[Build Templates] do not have the container image of `greeter`; then you can update the Knative serving service to use the pre-built greeter image available at `quay.io/rhdevelopers/knative-greeter:quarkus`
 ====
 
 [#eventing-deploy-subscriber-service]
@@ -326,4 +323,4 @@ copyToClipboard::eventing-run-oc-cleanup2[]
 --
 ====
 
-NOTE: You can also delete xref:ROOT:{build-repo}/build.adoc#build-apply-prereq-resources[pre-req resources] that were created if you don't need them anymore.
+NOTE: You can also delete xref:knative-tutorial-build:ROOT:build.adoc#build-apply-prereq-resources[pre-req resources] that were created if you don't need them anymore.

@@ -9,13 +9,13 @@ Clone the Knative Operator sources locally:
 [#setup-ocp-kn-operator]
 [source,bash,subs="+macros,+attributes"]
 -----
-cd $TUTORIAL_HOME/work \
+cd $TUTORIAL_HOME \
 git clone https://github.com/openshift-cloud-functions/knative-operators \
 cd knative-operators
 -----
 copyToClipboard::setup-ocp-kn-operator[]
 
-**OCP**
+**OpenShift Container Platform**
 
 If you have an existing OpenShift cluster then run the following commands:
 
