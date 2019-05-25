@@ -5,31 +5,22 @@
 If you have already cloned the repo and built the `greeter` service you can skip this step.
 ====
 
-* Navigate to work folder
+* Navigate to `greeter` app folder in pass:[$TUTORIAL_HOME]
 
-[#navigate-to-work-folder]
+[#navigate-to-greeter-app-folder]
 [source,bash,subs="+macros,+attributes"]
 ----
-cd $TUTORIAL_HOME/work
+cd $TUTORIAL_HOME/apps/greeter
 ----
-copyToClipboard::navigate-to-work-folder[]
-
-* Clone the application source code 
-
-[#clone-greeter-sources]
-[source,bash,subs="+macros,+attributes"]
-----
-git clone https://github.com/redhat-developer-demos/knative-tutorial-greeter.git
-----
-copyToClipboard::clone-greeter-sources[]
+copyToClipboard::navigate-to-greeter-app-folder[]
 
 * Build the application and container image 
 
 [#build-greeter]
 [source,bash,subs="+macros,+attributes"]
 ----
-cd knative-tutorial-greeter/java/quarkus
-./mvnw clean package
+cd java/quarkus && \
+./mvnw clean package && \
 docker build -t dev.local/rhdevelopers/greeter:0.0.1  -f Dockerfile.all .
 ----
 copyToClipboard::build-greeter[]
@@ -50,7 +41,3 @@ dev.local/rhdevelopers/greeter   0.0.1               6aa8771da8dd        2 hours
 ----
 
 # end::greeter[]
-
-# tag::event-greeter[]
-
-# end::event-greeter[]

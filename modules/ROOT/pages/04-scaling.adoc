@@ -23,7 +23,6 @@ include::partial$build-containers.adoc[tag=greeter]
 
 Let's apply a few defaults to Knative's auto scaling configuration.
 
-[.text-center]
 .link:{github-repo}/{scaling-repo}/knative/autoscaling-configmap.yaml[autoscaling-configmap.yaml]
 [source,yaml,linenums]
 ----
@@ -76,7 +75,6 @@ copyToClipboard::scaling-run-oc-apply-cm[]
 
 The following snippet shows how a Knative service YAML will look like:
 
-[.text-center]
 .link:{github-repo}/{basics-repo}/knative/service.yaml[service.yaml]
 [source,yaml,linenums]
 ----
@@ -186,7 +184,6 @@ copyToClipboard::scaling-oc-set-env[]
 --
 ====
 
-[.text-center]
 As described above, the time it takes to finally scale to zero will be `STABLE_WINDOW + SCALE_TO_ZERO_GRACE_PERIOD`.
 
 [IMPORTANT]
@@ -371,7 +368,6 @@ For this exercise let us make our service handle only **10** concurrent requests
 
 [#scaling-concurrency-10]
 === Service with concurrency of 10 requests
-[.text-center]
 .link:{github-repo}/{scaling-repo}/knative/service-10.yaml[service-10.yaml]
 [source,yaml,linenums]
 ----
@@ -468,7 +464,6 @@ After you've successfully run this small load test, you will notice the number o
 
 The autoscale pods is computed using the formula:
 
-[.text-center]
 [source,bash,subs="+macros,+attributes"]
 ----
 totalPodsToScale = inflightRequests / concurrencyTarget
@@ -487,7 +482,6 @@ The following example shows how to make Knative create services that start with 
 
 [#scaling-deploy-service-minscale]
 === Deploy service 
-[.text-center]
 .link:{github-repo}/{scaling-repo}/knative/service-min-scale.yaml[service-min-scale.yaml]
 [source,yaml,linenums]
 ----

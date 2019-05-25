@@ -32,7 +32,6 @@ copyToClipboard::navigate-crtd-folder[]
 === Deploy Configuration revision 1
 
 The following snippet shows how a Knative configuration resource YAML looks like:
-[.text-center]
 .link:{github-repo}/{configs-and-routes-repo}/config/configuration-rev1.yaml[configuration-rev1.yaml]
 [source,yaml,linenums]
 ----
@@ -89,7 +88,6 @@ The command will return `HTTP 404` as there are no routes deployed yet. Let us n
 [#crtd-deploy-route]
 == Deploy Route
 Let us now deploy a route that will route all the traffic to the configuration we just deployed.
-[.text-center]
 .link:{github-repo}/{configs-and-routes-repo}/route/route_default.yaml[route_default.yaml]
 [source,yaml,linenums]
 ----
@@ -153,7 +151,6 @@ include::partial$knative-objects.adoc[tag=knative-config-revisions]
 Knative follows a revision model for its configurations. Each time you change something in the `revisionTemplate` Knative will effectively generate a new revision and thus a new deployment. In this example we add a new environment variable to demonstrate that mechanism. 
 
 === Deploy configuration revision 2 
-[.text-center]
 .link:{github-repo}/{configs-and-routes-repo}/config/configuration-rev2.yaml[configuration-rev2.yaml]
 [source,yaml,linenums]
 ----

@@ -312,3 +312,56 @@ copyToClipboard::oc-knative-services[]
 ====
 
 #end::knative-event-services[]
+
+#tag::knative-triggers[]
+[tabs]
+====
+kubectl::
++
+--
+[#knative-triggers]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl --namespace {tutorial-namespace}  get triggers.eventing.knative.dev event-greeter-trigger  
+----
+copyToClipboard::knative-triggers[]
+--
+oc::
++
+--
+[#oc-knative-triggers]
+[source,bash,subs="+macros,+attributes"]
+----
+oc --namespace {tutorial-namespace}  get triggers.eventing.knative.dev event-greeter-trigger 
+----
+copyToClipboard::oc-knative-triggers[]
+--
+====
+
+#end::knative-triggers[]
+
+#tag::knative-container-event-sources[]
+[tabs]
+====
+kubectl::
++
+--
+[#knative-container-event-sources]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl --namespace {tutorial-namespace} get containersources.sources.eventing.knative.dev heartbeat-event-source
+----
+copyToClipboard::knative-container-event-sources[]
+--
+oc::
++
+--
+[#oc-knative-container-event-sources]
+[source,bash,subs="+macros,+attributes"]
+----
+oc --namespace {tutorial-namespace} get containersources.sources.eventing.knative.dev heartbeat-event-source
+----
+copyToClipboard::oc-knative-container-event-sources[]
+--
+====
+#end::knative-container-event-sources[]
