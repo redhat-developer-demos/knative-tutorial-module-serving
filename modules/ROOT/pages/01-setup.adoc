@@ -57,14 +57,26 @@ Knative works best with any container registry that support `v2_2` schema e.g. h
 == Download Tutorial Sources
 Before we start setting up the environment, let's clone the tutorial sources and set the `TUTORIAL_HOME` environment variable to point to the root directory of the tutorial:
 
+ifdef::workshop-version[]
 [#cloneRepo]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
+----
+git clone -b {workshop-version} https://github.com/redhat-developer-demos/knative-tutorial 
+----
+copyToClipboard::cloneRepo[]
+endif::[]
+
+ifndef::workshop-version[]
+[#cloneRepo]
+[source,bash,subs="attributes+,+macros"]
 ----
 git clone https://github.com/redhat-developer-demos/knative-tutorial 
 ----
 copyToClipboard::cloneRepo[]
+endif::[]
 
-[IMPORTANT,subs="+macros,+attributes"]
+ifndef::workshop[]
+[IMPORTANT,subs="attributes+,+macros"]
 ====
 
 This tutorial was developed and tested with:
@@ -74,7 +86,9 @@ This tutorial was developed and tested with:
 - OpenShift `{openshift-version}`
 - Minishift `{minishift-version}`
 ====
+endif::[]
 
+ifndef::workshop[]
 [#kubernetes-cluster]
 == Kubernetes Cluster
 
@@ -91,3 +105,8 @@ Minishift::
 include::partial$openshift-setup.adoc[]
 --
 ====
+endif::[]
+
+ifdef::workshop[]
+include::workshop:partial$openshift-setup.adoc[]
+endif::[]

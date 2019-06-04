@@ -1,3 +1,4 @@
+ifndef::workshop[]
 =====
 [tabs]
 ====
@@ -5,7 +6,7 @@ kubectl::
 +
 --
 [#{doc-sec}-ctrd-run-all-to-rev]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 cat link:{url}[{url-text}] |\
  yq w - 'spec.traffic[0].revisionName' {revision} | kubectl apply -n {tutorial-namespace} -f - 
@@ -15,14 +16,17 @@ copyToClipboard::{doc-sec}-ctrd-run-all-to-rev[]
 oc::
 +
 --
-
+endif::[]
 [#{doc-sec}-ctrd-run-oc-all-to-rev]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 cat link:{url}[{url-text}] |\
  yq w - 'spec.traffic[0].revisionName' {revision} | oc apply -n {tutorial-namespace} -f - 
 ----
 copyToClipboard::{doc-sec}-ctrd-run-oc-all-to-rev[]
+
+ifndef::workshop[]
 --
 ====
 =====
+endif::[]
