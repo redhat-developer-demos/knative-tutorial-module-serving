@@ -1,6 +1,16 @@
 = Basics and Fundamentals
 include::_attributes.adoc[]
 
+ifdef::workshop[]
+:service-file: service.remote.yaml
+:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+endif::[]
+
+ifndef::workshop[]
+:service-file: service.yaml
+:greeter-image: dev.local/rhdevelopers/greeter:0.0.1 #<2>
+endif::[]
+
 At the end of this chapter you will be able to :
 
 * Deploy a Knative service.
@@ -8,6 +18,7 @@ At the end of this chapter you will be able to :
 * Choose between different service deployment strategies.
 * Run different revisions of a service.
 
+ifndef::workshop[]
 [#basics-prerequisite]
 == Prerequisite
 
@@ -16,6 +27,7 @@ include::partial$prereq-cli.adoc[]
 [#basics-build-containers]
 == Build Containers
 include::partial$build-containers.adoc[tag=greeter]
+endif::[]
 
 [#basics-deploy-service]
 == Deploy Service
@@ -29,8 +41,8 @@ cd $TUTORIAL_HOME/{basics-repo}/knative
 
 The following snippet shows what a Knative service YAML looks like:
 
-.link:{github-repo}/{basics-repo}/knative/service.yaml[service.yaml]
-[source,yaml,linenums]
+.link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
+[source,yaml,subs="attributes+,+macros"]
 ----
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
@@ -42,21 +54,24 @@ spec:
       revisionTemplate:
         spec:
           container:
-            image: dev.local/rhdevelopers/greeter:0.0.1 #<2>
+            image: {greeter-image}
 ----
 
 <1> Makes Knative always run the latest revision of the deployment
+ifndef::workshop[]
 <2> It is very important that the image is a fully qualified docker image name with tag. For more details on this, see xref:ROOT:faq.adoc#faq-q2[Question 2 of FAQ]
+endif::[]
 
 The service can be deployed using the following command:
  
 :doc-sec: basics-rev1-deploy
-:url: {github-repo}/{basics-repo}/knative/service.yaml
-:url-alt-text: service.yaml
+:url: {github-repo}/{basics-repo}/knative/{service-file}
+:url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
 After successful deployment of the service we should see a Kubernetes Deployment named similar to `greeter-nsrbr-deployment` available:
 
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -72,14 +87,17 @@ copyToClipboard::basics-run-get-deployments[]
 oc::
 +
 --
+endif::[]
 [#basics-run-oc-get-deployments]
 [source,bash,linenums,subs="+macros,+attributes"]
 ----
 oc get deployments -n {tutorial-namespace}
 ----
 copyToClipboard::basics-run-oc-get-deployments[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 [NOTE]
 ====
@@ -88,6 +106,7 @@ copyToClipboard::basics-run-oc-get-deployments[]
 
 [#basics-invoke-service]
 == Invoke Service
+ifndef::workshop[]
 [tabs]
 ====
 Minikube::
@@ -107,6 +126,14 @@ Minishift::
 include::ROOT:partial$invoke-service.adoc[tag=*]
 --
 ====
+endif::[]
+
+ifdef::workshop[]
+:k8s-env: minishift
+:k8s-cli: oc
+:doc-sec: bis
+include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
+endif::[]
 
 The `http` command should return a response containing a line similar to **Hi  greeter => '6fee83923a9f' : 1**
 
@@ -159,8 +186,15 @@ To deploy a new revision of the greeter service, we will add an environment vari
 [#basics-service-rev2]
 === Service revision 2
 
-.link:{github-repo}/{basics-repo}/knative/service-env.yaml[service-env.yaml]
-[source,yaml,linenums]
+ifndef::workshop[]
+:service-file: service-env.yaml
+endif::[]
+ifdef::workshop[]
+:service-file: service-env.remote.yaml
+endif::[]
+
+.link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
+[source,yaml,linenums,subs="attributes+,+macros"]
 ----
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
@@ -172,7 +206,7 @@ spec:
       revisionTemplate:
         spec:
           container:
-            image: dev.local/rhdevelopers/greeter:0.0.1
+            image: {greeter-image}
             env:
              - name: MESSAGE_PREFIX #<1>
                value: Namaste
@@ -183,8 +217,8 @@ spec:
 Let us deploy the new revision using the command:
 
 :doc-sec: basics-rev2-deploy
-:url: {github-repo}/{basics-repo}/knative/service-env.yaml
-:url-alt-text: service-env.yaml
+:url: {github-repo}/{basics-repo}/knative/{service-file}
+:url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
 
@@ -198,6 +232,13 @@ Now if you list revisions, you will see two of them, named similar to `greeter-c
 include::partial$knative-objects.adoc[tag=knative-revisions]
 
 <<basics-invoke-service,Invoking Service>> will now show an output like **Namaste  greeter => '6fee83923a9f' : 1**, where __Namaste__ is the value we configured via environment variable in the Knative service resource file.
+
+ifndef::workshop[]
+:service-file: service-pinned.yaml
+endif::[]
+ifdef::workshop[]
+:service-file: service-pinned.remote.yaml
+endif::[]
 
 [#basics-pinning-revision]
 == Pinning Service to a Revision
@@ -213,8 +254,8 @@ You can use the <<rev1-basics-show-knative-revisions, show Knative service revis
 
 === Service pinned to first revision
 
-.link:{github-repo}/{basics-repo}/knative/service-pinned-rev1.yaml[service-pinned.yaml]
-[source,yaml,linenums]
+.link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
+[source,yaml,linenums,subs="attributes+,+macros"]
 ----
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
@@ -228,7 +269,7 @@ spec:
     revisionTemplate:
       spec:
         container:
-          image: dev.local/rhdevelopers/greeter:0.0.1
+          image: {greeter-image}
           env:
             - name: MESSAGE_PREFIX
               value: Namaste
@@ -248,6 +289,7 @@ The names of revisions may be different in your setup
 ====
 
 Let us redeploy the greeter service by pinning it to the first revision that was created:
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -264,6 +306,7 @@ copyToClipboard::run-pinned-revision[]
 oc::
 +
 --
+endif::[]
 [#run-oc-pinned-revision]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -271,14 +314,16 @@ PIN_REVISION=`oc get rev -n {tutorial-namespace} -l serving.knative.dev/service=
 cat service-pinned.yaml | yq w - "spec.release.revisions[+]" $PIN_REVISION | oc -n {tutorial-namespace}  apply -f -
 ----
 copyToClipboard::run-oc-pinned-revision[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 <<basics-invoke-service,Invoking Service>> will produce output similar to **Hi  greeter => '6fee83923a9f' : 1**
 
 [#basics-cleanup]
 == Cleanup
-
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -294,11 +339,14 @@ copyToClipboard::basics-run-cleanup[]
 oc::
 +
 --
+endif::[]
 [#basics-run-oc-cleanup]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc -n {tutorial-namespace} delete services.serving.knative.dev greeter
 ----
 copyToClipboard::basics-run-oc-cleanup[]
+ifndef::workshop[]
 --
 ====
+endif::[]

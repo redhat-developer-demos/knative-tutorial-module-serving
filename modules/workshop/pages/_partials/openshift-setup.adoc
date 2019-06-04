@@ -1,0 +1,33 @@
+== Configure your OpenShift Environment
+
+=== Prepare your shell environment
+
+[#knative-tutorial-shell-env]
+[source,bash,subs="attributes+,+macros"]
+----
+cd knative-tutorial
+export TUTORIAL_HOME=pass:[`pwd`]
+export WORKSHOP_USER='PUT YOUR USER NUMBER HERE'
+export WORKSHOP_OPENSHIFT_SERVER='PUT THE OPENSHIFT SEVER URL HERE'
+----
+copyToClipboard::knative-tutorial-shell-env[]
+
+=== Login into OpenShift 
+
+[#knative-tutorial-oc-login]
+[source,bash,subs="attributes+,+macros"]
+----
+oc login --username pass:[$WORKSHOP_USER] --server pass:[$WORKSHOP_OPENSHIFT_SERVER] --insecure-skip-tls-verify=false
+----
+copyToClipboard::knative-tutorial-oc-login[]
+
+You can also access the OpenShift Console via url {openshift-console-url}
+
+=== Change to OpenShift Workshop Project
+
+[#knative-oc-project]
+[source,bash,subs="attributes+,+macros"]
+----
+oc project pass:[$WORKSHOP_USER]-knativetutorial
+----
+copyToClipboard::knative-oc-project[]

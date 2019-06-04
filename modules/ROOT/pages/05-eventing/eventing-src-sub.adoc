@@ -1,6 +1,15 @@
 = Eventing - Source to Subscriber
 include::_attributes.adoc[]
 
+//Define vars
+ifdef::workshop[]
+:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+endif::[]
+
+ifndef::workshop[]
+:greeter-image:  docker.io/demo/event-greeter:0.0.1 <1>
+endif::[]
+
 [#eventing-channel]
 == Channel(Sink)
 
@@ -36,13 +45,14 @@ include::ROOT:partial$deploy-knative-resources.adoc[]
 
 [#eventing-verify-event-channel]
 ==== Verification
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-run-verify-event-channel]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 kubectl -n {tutorial-namespace} get channels.eventing.knative.dev 
 ----
@@ -51,19 +61,22 @@ copyToClipboard::eventing-run-verify-event-channel[]
 oc::
 +
 --
+endif::[]
 
 [#eventing-run-oc-verify-event-channel]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 oc -n {tutorial-namespace} get channels.eventing.knative.dev 
 ----
 copyToClipboard::eventing-run-oc-verify-event-channel[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 Running  the above command should return the following result:
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 NAME                       AGE
 ch-event-greeter   39s
@@ -77,7 +90,7 @@ The event source listens to external events e.g. a kafka topic or for a file on 
 [#eventing-create-event-source]
 === Create Event Source
 .link:{github-repo}/{eventing-repo}/knative/event-source.yaml[event-source.yaml]
-[source,yaml,subs="+macros,+attributes"]
+[source,yaml,subs="attributes+,+macros"]
 ----
 apiVersion: sources.eventing.knative.dev/v1alpha1
 kind: CronJobSource #<1>
@@ -112,13 +125,14 @@ include::ROOT:partial$deploy-knative-resources.adoc[]
 
 [#eventing-verify-event-source]
 ==== Verification
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-run-verify-event-src]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 kubectl -n {tutorial-namespace} get cronjobsources.sources.eventing.knative.dev 
 ----
@@ -127,18 +141,21 @@ copyToClipboard::eventing-run-verify-event-src[]
 oc::
 +
 --
+endif::[]
 [#eventing-run-oc-verify-event-src]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 oc -n {tutorial-namespace} get cronjobsources.sources.eventing.knative.dev 
 ----
 copyToClipboard::eventing-run-oc-verify-event-src[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 Running  the above command should return the following result:
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 NAME                       AGE
 event-greeter-cronjob-source  39s
@@ -154,7 +171,7 @@ The event subscription is responsible of connecting the channel(sink) with the s
 [#eventing-create-subscriber]
 === Create Channel Subscriber
 .link:{github-repo}/{eventing-repo}/knative/channel-subscriber.yaml[channel-subscriber.yaml]
-[source,yaml,subs="+macros,+attributes"]
+[source,yaml,subs="attributes+,+macros"]
 ----
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Subscription
@@ -186,13 +203,14 @@ include::ROOT:partial$deploy-knative-resources.adoc[]
 
 [#eventing-verify-subscriber]
 ==== Verification
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-run-verify-subscriber]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 kubectl -n {tutorial-namespace} get subscriptions.eventing.knative.dev 
 ----
@@ -201,18 +219,21 @@ copyToClipboard::eventing-run-verify-subscriber[]
 oc::
 +
 --
+endif::[]
 [#eventing-run-oc-verify-subscriber]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 oc -n {tutorial-namespace} get subscriptions.eventing.knative.dev 
 ----
 copyToClipboard::eventing-run-oc-verify-subscriber[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 Running  the above command should return the following result:
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 NAME                       AGE
 event-greeter-subscriber  39s
@@ -240,15 +261,26 @@ TIP: Add `-oyaml` to the above commands to get more details about each object th
 
 Run the following command to create the knative service that will be used as the subscriber for the cron events:
 
+ifndef::workshop[]
 [#eventing-run-create-service]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image pass:[$DESTINATION_IMAGE_NAME]
 ----
 copyToClipboard::eventing-run-create-service[]
+endif::[]
+
+ifdef::workshop[]
+[#eventing-run-create-service]
+[source,bash,subs="attributes+,+macros",linenums]
+----
+yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image '{greeter-image}'
+----
+copyToClipboard::eventing-run-create-service[]
+endif::[]
 
 .service.yaml 
-[source,yaml,subs="+macros,+attributes"]
+[source,yaml,subs="attributes+,+macros"]
 ----
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
@@ -263,9 +295,10 @@ spec:
             app: event-greeter
         spec:
           container:
-            image: docker.io/demo/event-greeter:0.0.1 <1>
+            image: {greeter-image}
 ----
 
+ifndef::workshop[]
 <1> Set from `pass:[${DESTINATION_IMAGE_NAME}]` environment variable --  the fully qualified container image that will be pushed to the registry as part of the build --
 
 Refer to xref:knative-tutorial-build:ROOT:build.adoc#build-set-env[Build Environment Variables]
@@ -274,6 +307,7 @@ Refer to xref:knative-tutorial-build:ROOT:build.adoc#build-set-env[Build Environ
 ====
 If you have skipped the xref:knative-tutorial-build:ROOT:build.adoc[Build] or xref:knative-tutorial-build:ROOT:build-templates.adoc[Build Templates] do not have the container image of `greeter`; then you can update the Knative serving service to use the pre-built greeter image available at `quay.io/rhdevelopers/knative-greeter:quarkus`
 ====
+endif::[]
 
 [#eventing-deploy-subscriber-service]
 === Deploy Subscriber Service
@@ -289,14 +323,14 @@ You can xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs] to se
 
 [#eventing-cleanup]
 == Cleanup
-
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-run-cleanup2]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 kubectl -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
 kubectl -n {tutorial-namespace} delete \
@@ -310,8 +344,9 @@ copyToClipboard::eventing-run-cleanup2[]
 oc::
 +
 --
+endif::[]
 [#eventing-run-oc-cleanup2]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 oc -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
 oc -n {tutorial-namespace} delete \
@@ -320,7 +355,10 @@ oc -n {tutorial-namespace} delete channels.eventing.knative.dev ch-event-greeter
 oc -n {tutorial-namespace} delete subscriptions.eventing.knative.dev event-greeter-subscriber
 ----
 copyToClipboard::eventing-run-oc-cleanup2[]
+ifndef::workshop[]
 --
 ====
 
 NOTE: You can also delete xref:knative-tutorial-build:ROOT:build.adoc#build-apply-prereq-resources[pre-req resources] that were created if you don't need them anymore.
+
+endif::[]

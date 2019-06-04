@@ -4,7 +4,7 @@
 Navigate to the tutorial chapter's `knative` folder:
 
 [#eventing-navigate-to-folder]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 cd $TUTORIAL_HOME/{eventing-repo}/knative
 ----
@@ -15,13 +15,15 @@ copyToClipboard::eventing-navigate-to-folder[]
 # tag::cronjob-source[]
 
 The cronjob source also creates a service pod,
+
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-run-get-pods]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 kubectl -n {tutorial-namespace} get pods 
 ----
@@ -30,18 +32,21 @@ copyToClipboard::eventing-run-get-pods[]
 oc::
 +
 --
+endif::[]
 [#eventing-run-oc-get-pods]
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 oc -n {tutorial-namespace} get pods 
 ----
 copyToClipboard::eventing-run-oc-get-pods[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 The above command will return an output like,
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 NAME                                                          READY     STATUS    RESTARTS   AGE
 cronjob-event-greeter-cronjob-source-4v9vq-6bff96b58f-tgrhj   2/2       Running   0          6m

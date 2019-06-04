@@ -1,6 +1,7 @@
 [doc-sec='']
 
 #tag::knative-services[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -12,24 +13,26 @@ kubectl::
 kubectl --namespace {tutorial-namespace}  get services.serving.knative.dev greeter 
 ----
 copyToClipboard::knative-services[]
-
 --
 oc::
 +
 --
+endif::[]
 [#oc-knative-services]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace}  get services.serving.knative.dev greeter 
 ----
 copyToClipboard::oc-knative-services[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-services[]
 
 #tag::knative-configs[]
-
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -41,23 +44,26 @@ kubectl::
 kubectl --namespace {tutorial-namespace} get configurations.serving.knative.dev greeter
 ----
 copyToClipboard::knative-configs[]
-
 --
 oc::
 +
 --
+endif::[]
 [#oc-knative-configs]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get configurations.serving.knative.dev greeter
 ----
 copyToClipboard::oc-knative-configs[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-configs[]
 
 #tag::knative-routes[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -69,23 +75,26 @@ kubectl::
 kubectl --namespace {tutorial-namespace} get routes.serving.knative.dev greeter
 ----
 copyToClipboard::knative-routes[]
-
 --
 oc::
 +
 --
+endif::[]
 [#oc-knative-routes]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get routes.serving.knative.dev greeter
 ----
 copyToClipboard::oc-knative-routes[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-routes[]
 
 #tag::knative-revisions[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -103,6 +112,7 @@ copyToClipboard::knative-revisions[]
 oc::
 +
 --
+endif::[]
 [#{doc-sec}-oc-knative-revisions]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -111,13 +121,16 @@ oc --namespace {tutorial-namespace} get rev \
  --sort-by="{.metadata.creationTimestamp}"
 ----
 copyToClipboard::oc-knative-revisions[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-revisions[]
 
 #tag::knative-config-revisions[]
 
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -136,7 +149,7 @@ copyToClipboard::knative-config-revisions[]
 oc::
 +
 --
-
+endif::[]
 [#oc-knative-config-revisions]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -145,12 +158,15 @@ oc --namespace {tutorial-namespace} get rev \
   --sort-by="{.metadata.creationTimestamp}"
 ----
 copyToClipboard::oc-knative-config-revisions[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-config-revisions[]
 
 #tag::knative-build[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -166,18 +182,22 @@ copyToClipboard::knative-build[]
 oc::
 +
 --
+endif::[]
 [#oc-knative-build]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get builds.build.knative.dev event-greeter-build
 ----
 copyToClipboard::oc-knative-build[]
+ifndef::workshp[]
 --
 ====
+endif::[]
 
 #end::knative-build[]
 
 #tag::knative-build-templates[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -193,18 +213,21 @@ copyToClipboard::knative-build-templates[]
 oc::
 +
 --
-
+endif::[]
 [#oc-knative-build-templates]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get buildtemplates.build.knative.dev build-java-maven
 ----
 copyToClipboard::oc-knative-build-templates[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 #end::knative-build-templates[]
 
 #tag::knative-event-channel[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -220,18 +243,22 @@ copyToClipboard::knative-event-channel[]
 oc::
 +
 --
+endif::[]
 [#oc-knative-event-channel]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get channels.eventing.knative.dev ch-event-greeter
 ----
 copyToClipboard::oc-knative-event-channel[]
+
+ifndef::workshop[]
 --
 ====
-
+endif::[]
 #end::knative-event-channel[]
 
 #tag::knative-event-cronjob-sources[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -247,18 +274,21 @@ copyToClipboard::knative-event-sources[]
 oc::
 +
 --
+endif::[]
 [#oc-knative-event-sources]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get cronjobsources.sources.eventing.knative.dev event-greeter-cronjob-source
 ----
 copyToClipboard::oc-knative-event-sources[]
+ifndef::workshop[]
 --
 ====
-
+endif::[]
 #end::knative-event-cronjob-sources[]
 
 #tag::knative-event-subscribers[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -274,18 +304,22 @@ copyToClipboard::knative-event-subscribers[]
 oc::
 +
 --
+endif::[]
 [#oc-knative-event-subscribers]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get subscriptions.eventing.knative.dev event-greeter-subscriber
 ----
 copyToClipboard::oc-knative-event-subscribers[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-event-subscribers[]
 
 #tag::knative-event-services[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -301,6 +335,7 @@ copyToClipboard::knative-services[]
 oc::
 +
 --
+endif::[]
 [#oc-knative-services]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -308,12 +343,15 @@ oc::
 oc --namespace {tutorial-namespace}  get services.serving.knative.dev event-greeter 
 ----
 copyToClipboard::oc-knative-services[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-event-services[]
 
 #tag::knative-triggers[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -329,18 +367,22 @@ copyToClipboard::knative-triggers[]
 oc::
 +
 --
+endif::[]
 [#oc-knative-triggers]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace}  get triggers.eventing.knative.dev event-greeter-trigger 
 ----
 copyToClipboard::oc-knative-triggers[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 #end::knative-triggers[]
 
 #tag::knative-container-event-sources[]
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -356,12 +398,15 @@ copyToClipboard::knative-container-event-sources[]
 oc::
 +
 --
+endif::[]
 [#oc-knative-container-event-sources]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get containersources.sources.eventing.knative.dev heartbeat-event-source
 ----
 copyToClipboard::oc-knative-container-event-sources[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 #end::knative-container-event-sources[]

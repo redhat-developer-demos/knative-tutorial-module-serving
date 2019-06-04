@@ -1,6 +1,15 @@
 = Triggers and Brokers
 include::_attributes.adoc[]
 
+//Define vars
+ifdef::workshop[]
+:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+endif::[]
+
+ifndef::workshop[]
+:greeter-image:  docker.io/demo/event-greeter:0.0.1 <1>
+endif::[]
+
 [#events-triggers-brokers]
 == Events, Triggers and Brokers
 
@@ -17,13 +26,14 @@ include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
 
 First of all, we need to create a Broker. Knative eventing provides a Broker named `default` when a special label is added to a namespace.
 
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-trigger-broker-label-namespace]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 kubectl label namespace {tutorial-namespace} knative-eventing-injection=enabled
 ----
@@ -33,24 +43,28 @@ copyToClipboard::eventing-trigger-broker-label-namespace[]
 oc::
 +
 --
+endif::[]
 [#eventing-trigger-broker-oc-label-namespace]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 oc label namespace {tutorial-namespace} knative-eventing-injection=enabled
 ----
 copyToClipboard::eventing-trigger-broker-oc-label-namespace[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 This will create the `default` broker. Execute the following command to see it:
 
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-trigger-broker-see-broker]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 kubectl -n {tutorial-namespace} get brokers.eventing.knative.dev
 ----
@@ -60,18 +74,21 @@ copyToClipboard::eventing-trigger-broker-see-broker[]
 oc::
 +
 --
+endif::[]
 [#eventing-trigger-broker-oc-see-broker]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 oc label namespace {tutorial-namespace} get brokers.eventing.knative.dev
 ----
 copyToClipboard::eventing-trigger-broker-oc-see-broker[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 Output should be similar to below:
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 NAME      READY     REASON    HOSTNAME                                           AGE
 default   True                default-broker.knativetutorial.svc.cluster.local   2m
@@ -79,13 +96,14 @@ default   True                default-broker.knativetutorial.svc.cluster.local  
 
 Labeling the namespace will also create some pods that are related to the `default` broker.
 
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-trigger-broker-see-broker-pods]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 kubectl -n {tutorial-namespace} get pods
 ----
@@ -95,18 +113,21 @@ copyToClipboard::eventing-trigger-broker-see-broker-pods[]
 oc::
 +
 --
+endif::[]
 [#eventing-trigger-broker-oc-see-broker-pods]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 oc label namespace {tutorial-namespace} get pods
 ----
 copyToClipboard::eventing-trigger-broker-oc-see-broker-pods[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 Running  the above command should return the following result:
 
-[source,bash,subs="+macros,+attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 NAME                                      READY     STATUS    RESTARTS   AGE
 default-broker-filter-5bb94d8ddf-r9j4v    2/2       Running   1          2m43s
@@ -122,15 +143,26 @@ default-broker-ingress-59b9b4985c-8n6d4   2/2       Running   1          2m43s
 
 Run the following command to create the Knative service that will be used as the subscriber for the events that are going to be published later:
 
+ifdef::workshop[]
 [#eventing-run-gen-service]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
+----
+yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image '{greeter-image}'
+----
+copyToClipboard::eventing-run-gen-service[]
+endif::[]
+
+ifndef::workshop[]
+[#eventing-run-gen-service]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image pass:[$DESTINATION_IMAGE_NAME]
 ----
 copyToClipboard::eventing-run-gen-service[]
+endif::[]
 
 .service.yaml
-[source,yaml,linenums,subs="+macros,+attributes"]
+[source,yaml,linenums,subs="attributes+,+macros"]
 ----
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
@@ -145,9 +177,10 @@ spec:
             app: event-greeter
         spec:
           container:
-            image: docker.io/demo/event-greeter:0.0.1 <1>
+            image: {greeter-image}
 ----
 
+ifndef::workshop[]
 <1> Set from `pass:[${DESTINATION_IMAGE_NAME}]` environment variable --  the fully qualified container image that will be pushed to the registry as part of the build --
 
 Refer to xref:knative-tutorial-build:ROOT:build.adoc#build-set-env[Build Environment Variables]
@@ -156,6 +189,7 @@ Refer to xref:knative-tutorial-build:ROOT:build.adoc#build-set-env[Build Environ
 ====
 If you have skipped the xref:knative-tutorial-build:ROOT:build.adoc[Build] or xref:knative-tutorial-build:ROOT:build-templates.adoc[Build Templates] and dont have the container image of `greeter`; then you can update the Knative serving service to use the pre-built greeter image available at `quay.io/rhdevelopers/knative-tutorial-greeter:quarkus`
 ====
+endif::[]
 
 [#eventing-deploy-service]
 === Deploy Service
@@ -171,7 +205,7 @@ include::ROOT:partial$deploy-knative-resources.adoc[]
 [#eventing-event-source]
 == Event Source
 .link:{github-repo}/{eventing-repo}/knative/event-source-broker.yaml[event-source-broker.yaml]
-[source,yaml,linenums,subs="+macros,+attributes"]
+[source,yaml,linenums,subs="attributes+,+macros"]
 ----
 apiVersion: sources.eventing.knative.dev/v1alpha1
 kind: ContainerSource #<1>
@@ -212,7 +246,7 @@ include::ROOT:partial$deploy-knative-resources.adoc[]
 [#eventing-trigger]
 == Trigger
 .link:{github-repo}/{eventing-repo}/knative/trigger.yaml[trigger.yaml]
-[source,yaml,linenums,subs="+macros,+attributes"]
+[source,yaml,linenums,subs="attributes+,+macros"]
 ----
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
@@ -266,13 +300,14 @@ include::partial$knative-objects.adoc[tag=knative-triggers]
 
 [#eventing-cleanup]
 == Cleanup
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
 +
 --
 [#eventing-run-trigger-broker-cleanup]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 kubectl -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
 kubectl -n {tutorial-namespace} delete \
@@ -291,8 +326,9 @@ copyToClipboard::eventing-run-trigger-broker-cleanup[]
 oc::
 +
 --
+endif::[]
 [#eventing-run-oc-trigger-broker-cleanup]
-[source,bash,subs="+macros,+attributes",linenums]
+[source,bash,subs="attributes+,+macros",linenums]
 ----
 oc -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
 oc -n {tutorial-namespace} delete \
@@ -306,8 +342,9 @@ oc -n {tutorial-namespace} delete \
  clusterchannelprovisioners.eventing.knative.dev in-memory-channel
 ----
 copyToClipboard::eventing-run-oc-trigger-broker-cleanup[]
+ifndef::workshop[]
 --
 ====
 
 NOTE: You can also delete xref:knative-tutorial-build:ROOT:build.adoc#build-apply-prereq-resources[pre-req resources] that were created if you don't need them anymore.
-
+endif::[]

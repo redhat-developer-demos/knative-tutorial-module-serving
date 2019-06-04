@@ -11,11 +11,13 @@ At the end of this chapter you will know and understand:
 * How to make a Knative serving service receive an event?
 * How to make a service a subscriber of an event?
 
+ifndef::workshop[]
 [#eventing-prerequisite]
 == Prerequisite 
 include::partial$prereq-cli.adoc[]
 
 include::partial$set-env-vars.adoc[]
+endif::[]
 
 [#eventing-watch-logs]
 == Watching Logs

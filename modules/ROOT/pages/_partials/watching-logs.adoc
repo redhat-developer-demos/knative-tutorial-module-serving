@@ -1,3 +1,4 @@
+ifndef::workshop[]
 [kube-ns='knativetutorial']
 [kube-svc='']
 
@@ -17,13 +18,16 @@ kubectl logs -n {kube-ns} -f <pod-name> -c user-container
 oc::
 +
 --
+endif::[]
 
 [source,bash,subs="+macros,+attributes"]
 ----
 oc logs -n {kube-ns} -f <pod-name> -c user-container
 ----
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 [TIP]
 ====
