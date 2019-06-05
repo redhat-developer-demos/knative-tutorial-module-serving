@@ -17,7 +17,7 @@ copyToClipboard::knative-tutorial-shell-env[]
 [#knative-tutorial-oc-login]
 [source,bash,subs="attributes+,+macros"]
 ----
-oc login --username pass:[$WORKSHOP_USER] --server pass:[$WORKSHOP_OPENSHIFT_SERVER] --insecure-skip-tls-verify=false
+oc login --username userpass:[$WORKSHOP_USER] --server pass:[$WORKSHOP_OPENSHIFT_SERVER] --insecure-skip-tls-verify=true
 ----
 copyToClipboard::knative-tutorial-oc-login[]
 
@@ -28,6 +28,6 @@ You can also access the OpenShift Console via url {openshift-console-url}
 [#knative-oc-project]
 [source,bash,subs="attributes+,+macros"]
 ----
-oc project pass:[$WORKSHOP_USER]-knativetutorial
+oc project {tutorial-namespace}
 ----
 copyToClipboard::knative-oc-project[]

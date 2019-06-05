@@ -34,10 +34,12 @@ endif::[]
 
 Navigate to the tutorial chapter's `knative` folder:
 
+[#basics-nav-folder]
 [source,bash,subs="+macros,+attributes"]
 ----
 cd $TUTORIAL_HOME/{basics-repo}/knative
 ----
+copyToClipboard::basics-nav-folder[]
 
 The following snippet shows what a Knative service YAML looks like:
 
@@ -299,7 +301,7 @@ kubectl::
 [source,bash,subs="+macros,+attributes"]
 ----
 PIN_REVISION=`kubectl get rev -n {tutorial-namespace} -l serving.knative.dev/service=greeter -l serving.knative.dev/configurationGeneration=1 | awk 'NR==2{print $1}'` && \
-cat service-pinned.yaml | yq w - "spec.release.revisions[+]" $PIN_REVISION | kubectl -n {tutorial-namespace} apply -f -
+cat {service-file} | yq w - "spec.release.revisions[+]" $PIN_REVISION | kubectl -n {tutorial-namespace} apply -f -
 ----
 copyToClipboard::run-pinned-revision[]
 --
@@ -311,7 +313,7 @@ endif::[]
 [source,bash,subs="+macros,+attributes"]
 ----
 PIN_REVISION=`oc get rev -n {tutorial-namespace} -l serving.knative.dev/service=greeter -l serving.knative.dev/configurationGeneration=1 | awk 'NR==2{print $1}'` && \
-cat service-pinned.yaml | yq w - "spec.release.revisions[+]" $PIN_REVISION | oc -n {tutorial-namespace}  apply -f -
+cat {service-file} | yq w - "spec.release.revisions[+]" $PIN_REVISION | oc -n {tutorial-namespace}  apply -f -
 ----
 copyToClipboard::run-oc-pinned-revision[]
 ifndef::workshop[]
