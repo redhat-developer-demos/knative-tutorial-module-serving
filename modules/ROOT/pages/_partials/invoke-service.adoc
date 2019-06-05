@@ -31,7 +31,7 @@ copyToClipboard::{doc-sec}-{k8s-cli}-svc-call[]
 [#{doc-sec}-{k8s-cli}-svc-call]
 [source,bash,subs="+macros,+attributes"]
 ----
-export SVC_URL=`oc get ksvc greeter -o jsonpath='{.status.domain}'` && \
+export SVC_URL=`oc get rt greeter -o yaml | yq read - 'status.url'` && \
 http $IP_ADDRESS $SVC_URL
 ----
 

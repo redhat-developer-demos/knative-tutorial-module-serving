@@ -77,6 +77,28 @@ include::ROOT:partial$deploy-knative-resources.adoc[]
 
 After the deployment was successful, we should see a kubernetes deployment like `greeter-wlcn4-deployment`.
 
+[#crtd-deploy-route]
+== Deploy Route
+Let us now deploy a route that will route all the traffic to the configuration we just deployed.
+
+.link:{github-repo}/{configs-and-routes-repo}/route/route_default.yaml[route_default.yaml]
+[source,yaml,linenums,subs="attributes+,+macros"]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: Route
+metadata:
+  name: greeter
+spec:
+  traffic:
+    - configurationName: greeter
+      percent: 100
+----
+
+:doc-sec: crtd-route-default-apply
+:url: {github-repo}/{configs-and-routes-repo}/route/route_default.yaml
+:url-alt-text: route/route_default.yaml
+include::ROOT:partial$deploy-knative-resources.adoc[]
+
 [#crtd-invoke-service]
 == Invoke Service
 
@@ -109,31 +131,7 @@ ifdef::workshop[]
 include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
 endif::[]
 
-The command will return `HTTP 404` as there are no routes deployed yet. Let us now deploy a route.
-
-[#crtd-deploy-route]
-== Deploy Route
-Let us now deploy a route that will route all the traffic to the configuration we just deployed.
-
-.link:{github-repo}/{configs-and-routes-repo}/route/route_default.yaml[route_default.yaml]
-[source,yaml,linenums,subs="attributes+,+macros"]
-----
-apiVersion: serving.knative.dev/v1alpha1
-kind: Route
-metadata:
-  name: greeter
-spec:
-  traffic:
-    - configurationName: greeter
-      percent: 100
-----
-
-:doc-sec: crtd-route-default-apply
-:url: {github-repo}/{configs-and-routes-repo}/route/route_default.yaml
-:url-alt-text: route/route_default.yaml
-include::ROOT:partial$deploy-knative-resources.adoc[]
-
-<<crtd-invoke-service,Invoking Service>> now should return a response like **Hi  greeter => '9be9ccd9a2e3' : 1**
+It now should return a response like **Hi  greeter => '9be9ccd9a2e3' : 1**
 
 NOTE: Sometimes the response might not be returned immediately especially when the pod is coming up from a dormant state. You might need to be a little patient :) .
 
@@ -242,7 +240,7 @@ ifdef::workshop[]
 ----
 #!/bin/bash
 set -eu
-SVC_URL=`oc get ksvc greeter -o jsonpath='{.status.domain}'`
+SVC_URL=`oc get -n {tutorial-namespace} rt greeter -o yaml | yq read - 'status.url'` 
 while true
 do
   http --body $SVC_URL
@@ -282,8 +280,8 @@ kubectl::
 [#ctrd-def-revisions]
 [source,bash,subs="attributes+,+macros"]
 ----
-REVISION_1=`kubectl -n knativetutorial get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==2{print $1}'`
-REVISION_2=`kubectl -n knativetutorial get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==3{print $1}'`
+REVISION_1=`kubectl -n {tutorial-namespace} get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==2{print $1}'`
+REVISION_2=`kubectl -n {tutorial-namespace} get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==3{print $1}'`
 ----
 copyToClipboard::ctrd-def-revisions[]
 --
@@ -294,8 +292,8 @@ endif::[]
 [#ctrd-def-oc-revisions]
 [source,bash,subs="attributes+,+macros"]
 ----
-REVISION_1=`oc -n knativetutorial get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==2{print $1}'`
-REVISION_2=`oc -n knativetutorial get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==3{print $1}'`
+REVISION_1=`oc -n {tutorial-namespace} get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==2{print $1}'`
+REVISION_2=`oc -n {tutorial-namespace} get rev -l serving.knative.dev/configuration=greeter --sort-by="{.metadata.creationTimestamp}" | awk 'NR==3{print $1}'`
 ----
 copyToClipboard::ctrd-def-oc-revisions[]
 ifndef::workshop[]
@@ -307,9 +305,9 @@ endif::[]
 === Send all traffic to revision 1
 :doc-sec: all-rev1
 :url: {github-repo}/{configs-and-routes-repo}/route/route_all_rev1.yaml
-:url-text: route/route_all_rev1
+:url-text: route/route_all_rev1.yaml
 :revision: $REVISION_1
-include::ROOT:partial$crtd-send-traffic.adoc[]
+include::ROOT:partial$crtd-send-traffic.adoc[tag=single]
 
 If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service always goes to your revision 1 e.g output will be something like **Hi  greeter => '9be9ccd9a2e3' : 1**.
 
@@ -320,7 +318,7 @@ If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service
 :url: {github-repo}/{configs-and-routes-repo}/route/route_all_to_revision.yaml
 :url-text: route/route_all_to_revision.yaml
 :revision: $REVISION_2
-include::ROOT:partial$crtd-send-traffic.adoc[]
+include::ROOT:partial$crtd-send-traffic.adoc[tag=single]
 
 If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service always goes to your revision 2 e.g output will be something like **Namaste  greeter => '9be9ccd9a2e3' : 1**.
 
@@ -330,8 +328,9 @@ If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service
 :doc-sec: rev1-50-rev2-50
 :url: {github-repo}/{configs-and-routes-repo}/route/route_rev1-50_rev2-50.yaml
 :url-text: route/route_rev1-50_rev2-50.yaml
-:revision: $REVISION_1
-include::ROOT:partial$crtd-send-traffic.adoc[]
+:revision-1: $REVISION_1
+:revision-2: $REVISION_2
+include::ROOT:partial$crtd-send-traffic.adoc[tag=double]
 
 If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service is distributed between revision 1 and revision 2 e.g output will be mix of responses like **Hi  greeter => '9be9ccd9a2e3' : 1** and **Namaste  greeter => '9be9ccd9a2e3' : 1**. You will also notice the traffic is distributed approximately 50% between the two revisions.
 
@@ -341,8 +340,9 @@ If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service
 :doc-sec: rev1-75-rev2-25
 :url: {github-repo}/{configs-and-routes-repo}/route/route_rev1-75_rev2-25.yaml
 :url-text: route/route_rev1-75_rev2-25.yaml
-:revision: $REVISION_1
-include::ROOT:partial$crtd-send-traffic.adoc[]
+:revision-1: $REVISION_1
+:revision-2: $REVISION_2
+include::ROOT:partial$crtd-send-traffic.adoc[tag=double]
 
 If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service is distributed between revision 1 and revision 2 e.g output will be mix of responses like **Hi  greeter => '9be9ccd9a2e3' : 1** and **Namaste  greeter => '9be9ccd9a2e3' : 1**. You will also notice the traffic is distributed approximately 75-25% between the two revisions.
 
@@ -352,8 +352,9 @@ If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service
 :doc-sec: rev1-rev2-10-90
 :url: {github-repo}/{configs-and-routes-repo}/route/route_rev1-10_rev2-90.yaml
 :url-text: route/route_rev1-10_rev2-90.yaml
-:revision: $REVISION_1
-include::ROOT:partial$crtd-send-traffic.adoc[]
+:revision-1: $REVISION_1
+:revision-2: $REVISION_2
+include::ROOT:partial$crtd-send-traffic.adoc[tag=double]
 
 If <<crtd-poll-sh,poll the service>> for some time,  you will notice the service is distributed between revision 1 and revision 2 e.g output will be mix of responses like **Hi  greeter => '9be9ccd9a2e3' : 1** and **Namaste  greeter => '9be9ccd9a2e3' : 1**. You will also notice the traffic is distributed approximately 10-90% between the two revisions.
 
