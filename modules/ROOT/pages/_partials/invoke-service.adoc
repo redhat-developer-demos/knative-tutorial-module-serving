@@ -32,9 +32,22 @@ copyToClipboard::{doc-sec}-{k8s-cli}-svc-call[]
 [source,bash,subs="+macros,+attributes"]
 ----
 export SVC_URL=`oc get rt greeter -o yaml | yq read - 'status.url'` && \
-http $IP_ADDRESS $SVC_URL
+http $SVC_URL
 ----
 
 copyToClipboard::{doc-sec}-{k8s-cli}-svc-call[]
 
 #end::workshop-call[]
+
+#tag::workshop-call-params[]
+
+[#{doc-sec}-{k8s-cli}-svc-call-params]
+[source,bash,subs="+macros,+attributes"]
+----
+export SVC_URL=`oc get rt greeter -o yaml | yq read - 'status.url'` && \
+http $SVC_URL/{svc-params}
+----
+
+copyToClipboard::{doc-sec}-{k8s-cli}-svc-call-params[]
+
+#end::workshop-call-params[]
