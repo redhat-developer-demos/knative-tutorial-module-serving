@@ -223,6 +223,8 @@ As described above, the time it takes to finally scale to zero will be `STABLE_W
 * the minimum value that can be set for `scale-to-zero-grace-period` is 30 seconds
 ====
 
+ifndef::workshop[]
+
 [#scaling-observer-scale-to-zero]
 === Observing default scale down 
 
@@ -406,17 +408,18 @@ ifndef::workshop[]
 --
 ====
 endif::[]
-
+endif::[]
 For better clarity and understanding let us <<scaling-cleanup,clean up>> the deployed Knative resources before going to next section.
+
 
 ifdef::workshop[]
 :service-file: service-10.remote.yaml
-:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+:greeter-image: quay.io/rhdevelopers/prime-generator:v27-quarkus
 endif::[]
 
 ifndef::workshop[]
 :service-file: service-10.yaml
-:greeter-image: dev.local/rhdevelopers/greeter:0.0.1
+:greeter-image: quay.io/rhdevelopers/prime-generator:v27-quarkus
 endif::[]
 
 [#scaling-auto-scaling]
@@ -466,34 +469,7 @@ include::ROOT:partial$deploy-knative-resources.adoc[]
 [#scaling-autoscaling-invoke-service]
 === Invoke Service 
 
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
-:k8s-env: minikube
-:k8s-cli: kubectl
-:doc-sec: scaling-auto-is
-include::partial$invoke-service.adoc[tag=env]
---
-oc::
-+
---
-:k8s-env: minishift
-:k8s-cli: oc
-:doc-sec: scaling-auto-is
-include::partial$invoke-service.adoc[tag=env]
---
-====
-endif::[]
-
-ifdef::workshop[]
-:k8s-env: minishift
-:k8s-cli: oc
-:doc-sec: bis
-include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
-endif::[]
+We will not invoke the service directly as we need to send the load to see the autoscaling:
 
 Open a new terminal and run the following command:
 
@@ -525,14 +501,26 @@ endif::[]
 
 We will now send some load to the greeter service.  The command below sends 50 concurrent requests (`-c 50`) for the next 30s (`-t 30s`)
 
+ifndef::workshop[]
 [#scaling-run-siege]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
 siege -r 1 -c 50 -t 30S \
   -H "Host:greeter.knativetutorial.example.com" \
-  "http://pass:[${IP_ADDRESS}]"
+  "http://pass:[${IP_ADDRESS}]/?sleep=3&upto=10000&memload=100"
 ----
 copyToClipboard::scaling-run-siege[]
+endif::[]
+
+ifdef::workshop[]
+[#scaling-run-siege]
+[source,bash,subs="attributes+,+macros",linenums]
+----
+siege -r 1 -c 50 -t 30S \
+  "pass:[${SVC_URL}]/?sleep=3&upto=10000&memload=100"
+----
+copyToClipboard::scaling-run-siege[]
+endif::[]
 
 After you've successfully run this small load test, you will notice the number of greeter service pods will have scaled to 5 automatically. 
 

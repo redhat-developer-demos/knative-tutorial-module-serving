@@ -1,3 +1,5 @@
+=====
+#tag::single[]
 ifndef::workshop[]
 =====
 [tabs]
@@ -30,3 +32,44 @@ ifndef::workshop[]
 ====
 =====
 endif::[]
+#end::single[]
+
+#tag::double[]
+ifndef::workshop[]
+=====
+[tabs]
+====
+kubectl::
++
+--
+[#{doc-sec}-ctrd-run-all-to-rev]
+[source,bash,subs="attributes+,+macros",linenums]
+----
+cat link:{url}[{url-text}] |\
+ yq w - 'spec.traffic[0].revisionName' {revision-1} |\
+ yq w - 'spec.traffic[1].revisionName' {revision-2} |\ 
+ kubectl apply -n {tutorial-namespace} -f - 
+----
+copyToClipboard::{doc-sec}-ctrd-run-all-to-rev[]
+--
+oc::
++
+--
+endif::[]
+[#{doc-sec}-ctrd-run-oc-all-to-rev]
+[source,bash,subs="attributes+,+macros",linenums]
+----
+cat link:{url}[{url-text}] |\
+ yq w - 'spec.traffic[0].revisionName' {revision-1} |\
+ yq w - 'spec.traffic[1].revisionName' {revision-2} |\
+ oc apply -n {tutorial-namespace} -f - 
+----
+copyToClipboard::{doc-sec}-ctrd-run-oc-all-to-rev[]
+
+ifndef::workshop[]
+--
+====
+=====
+endif::[]
+#end::double[]
+=====

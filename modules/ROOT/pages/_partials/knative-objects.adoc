@@ -104,10 +104,10 @@ kubectl::
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl --namespace {tutorial-namespace} get rev \
---label=serving.knative.dev/service=greeter \
+--selector=serving.knative.dev/service=greeter \
 --sort-by="{.metadata.creationTimestamp}"
 ----
-copyToClipboard::knative-revisions[]
+copyToClipboard::{doc-sec}knative-revisions[]
 --
 oc::
 +
@@ -117,10 +117,10 @@ endif::[]
 [source,bash,subs="+macros,+attributes"]
 ----
 oc --namespace {tutorial-namespace} get rev \
- --label=serving.knative.dev/service=greeter \
+ --selector=serving.knative.dev/service=greeter \
  --sort-by="{.metadata.creationTimestamp}"
 ----
-copyToClipboard::oc-knative-revisions[]
+copyToClipboard::{doc-sec}-oc-knative-revisions[]
 ifndef::workshop[]
 --
 ====
