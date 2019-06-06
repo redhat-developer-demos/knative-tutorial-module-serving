@@ -78,7 +78,7 @@ endif::[]
 [#eventing-trigger-broker-oc-see-broker]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-oc label namespace {tutorial-namespace} get brokers.eventing.knative.dev
+oc --namespace {tutorial-namespace} get brokers.eventing.knative.dev
 ----
 copyToClipboard::eventing-trigger-broker-oc-see-broker[]
 ifndef::workshop[]
@@ -117,7 +117,7 @@ endif::[]
 [#eventing-trigger-broker-oc-see-broker-pods]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-oc label namespace {tutorial-namespace} get pods
+oc --namespace {tutorial-namespace} get pods
 ----
 copyToClipboard::eventing-trigger-broker-oc-see-broker-pods[]
 ifndef::workshop[]
@@ -313,12 +313,7 @@ kubectl -n {tutorial-namespace} delete services.serving.knative.dev event-greete
 kubectl -n {tutorial-namespace} delete \
  containersource.sources.eventing.knative.dev heartbeat-event-source
 kubectl -n {tutorial-namespace} delete triggers.eventing.knative.dev event-greeter-trigger
-kubectl label namespace {tutorial-namespace} knative-eventing-injection-
 kubectl -n {tutorial-namespace} delete brokers.eventing.knative.dev default
-kubectl -n {tutorial-namespace} delete \
- clusterchannelprovisioners.eventing.knative.dev in-memory 
-kubectl -n {tutorial-namespace} delete \
- clusterchannelprovisioners.eventing.knative.dev in-memory-channel 
 ----
 copyToClipboard::eventing-run-trigger-broker-cleanup[]
 
@@ -334,12 +329,7 @@ oc -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
 oc -n {tutorial-namespace} delete \
  containersource.sources.eventing.knative.dev heartbeat-event-source
 oc -n {tutorial-namespace} delete triggers.eventing.knative.dev event-greeter-trigger
-oc label namespace {tutorial-namespace} knative-eventing-injection-
 oc -n {tutorial-namespace} delete brokers.eventing.knative.dev default
-oc -n {tutorial-namespace} delete \
- clusterchannelprovisioners.eventing.knative.dev in-memory 
-oc -n {tutorial-namespace} delete \
- clusterchannelprovisioners.eventing.knative.dev in-memory-channel
 ----
 copyToClipboard::eventing-run-oc-trigger-broker-cleanup[]
 ifndef::workshop[]
