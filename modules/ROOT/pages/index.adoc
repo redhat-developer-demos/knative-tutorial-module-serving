@@ -1,2 +1,7 @@
-= Knative Tutorial
+= {title}
 
+ifdef::workshop[]
+.Some useful workshop links and information:
+* OpenShift Console: {openshift-console-url}
+* Etherpad: {etherpad-url}
+endif::[]
