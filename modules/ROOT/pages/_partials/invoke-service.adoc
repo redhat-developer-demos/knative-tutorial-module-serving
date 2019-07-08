@@ -1,7 +1,3 @@
-[k8s-env='']
-[k8s-cli='']
-[doc-sec='']
-
 #tag::env[]
 
 [#{doc-sec}-{k8s-cli}-svc-gateway-env]
@@ -28,7 +24,7 @@ copyToClipboard::{doc-sec}-{k8s-cli}-svc-call[]
 
 #tag::workshop-call[]
 
-[#{doc-sec}-{k8s-cli}-svc-call]
+[#{doc-sec}{k8s-env}-{k8s-cli}-svc-call]
 [source,bash,subs="+macros,+attributes"]
 ----
 export SVC_URL=`oc get rt greeter -o yaml | yq read - 'status.url'` && \

@@ -1,3 +1,4 @@
+[#kubernetes-cluster]
 == Configure your OpenShift Environment
 
 === Prepare your shell environment
