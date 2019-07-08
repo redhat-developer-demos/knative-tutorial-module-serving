@@ -1,1 +1,4 @@
 openshift-cloud-functions
+.firebaserc
+.firebase
+firebase.json

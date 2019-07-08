@@ -14,7 +14,7 @@ endif::[]
 
 ifndef::workshop[]
 :service-file: configuration-rev1.yaml
-:greeter-image: dev.local/rhdevelopers/greeter:0.0.1 #<1>
+:greeter-image: dev.local/rhdevelopers/greeter:0.0.1
 endif::[]
 
 
@@ -64,10 +64,6 @@ spec:
         image: {greeter-image}
 ----
 
-ifndef::workshop[]
-<1> It is very important that the image is a fully qualified docker image name, including a  tag. For more details on this xref:ROOT:faq.adoc#faq-q2[Question 2 of FAQ].
-endif::[]
-
 The service is then deployed using:
 
 :doc-sec: crtd-rev1-apply
@@ -111,7 +107,7 @@ Minikube::
 :k8s-env: minikube
 :k8s-cli: kubectl
 :doc-sec: ctrd-is
-include::ROOT:partial$invoke-service.adoc[tag=*]
+include::ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
 --
 Minishift::
 +
@@ -119,7 +115,7 @@ Minishift::
 :k8s-env: minishift
 :k8s-cli: oc
 :doc-sec: ctrd-is
-include::ROOT:partial$invoke-service.adoc[tag=*]
+include::ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
 --
 ====
 endif::[]
