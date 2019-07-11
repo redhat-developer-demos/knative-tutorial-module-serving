@@ -55,7 +55,7 @@ spec:
 ----
 
 <1> Configures the Knative service to always run the latest revision of the deployment.
-ifndef::workshop[]
+
 
 Navigate to the tutorial chapter's `knative` folder:
 
@@ -68,7 +68,7 @@ copyToClipboard::scaling-navigate-to-basics[]
 
 The service can be deployed using the command:
 
-:doc-sec: crtd-rev1-apply
+:doc-sec: scal-rev1-apply
 :url: {github-repo}/{basics-repo}/knative/{service-file}
 :url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
@@ -111,6 +111,7 @@ The last `http` command should return a response like **Hi  greeter => '9be9ccd9
 
 Check <<02-basic-fundas.adoc#see-what-you-have-deployed,deployed Knative resources>> for more details on which Knative objects and resources have been created with the service deployment above.
 
+ifndef::workshop[]
 [#scaling-scale-to-zero]
 == Configure scale-to-zero 
 
@@ -166,6 +167,7 @@ As described above, the time it takes to finally scale to zero will be `STABLE_W
 * scale-to-zero-grace-period is a dynamic parameter so the new value will immediately be in effect after updating the config map
 * the minimum value that can be set for `scale-to-zero-grace-period` is 30 seconds
 ====
+endif::[]
 
 ifndef::workshop[]
 
