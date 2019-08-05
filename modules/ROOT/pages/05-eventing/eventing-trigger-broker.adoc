@@ -1,14 +1,7 @@
 = Triggers and Brokers
 include::_attributes.adoc[]
 
-//Define vars
-ifdef::workshop[]
 :greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
-endif::[]
-
-ifndef::workshop[]
-:greeter-image:  docker.io/demo/event-greeter:0.0.1
-endif::[]
 
 [#events-triggers-brokers]
 == Events, Triggers and Brokers
@@ -143,41 +136,10 @@ default-broker-ingress-59b9b4985c-8n6d4   2/2       Running   1          2m43s
 
 Run the following command to create the Knative service that will be used as the subscriber for the events that are going to be published later:
 
-ifdef::workshop[]
-[#eventing-run-gen-service]
-[source,bash,subs="attributes+,+macros",linenums]
+.link:{github-repo}/{eventing-repo}/knative/service.yaml[service.yaml]
+[source,yaml,subs="attributes+,+macros"]
 ----
-yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image '{greeter-image}'
-----
-copyToClipboard::eventing-run-gen-service[]
-endif::[]
-
-ifndef::workshop[]
-[#eventing-run-gen-service]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image pass:[$DESTINATION_IMAGE_NAME]
-----
-copyToClipboard::eventing-run-gen-service[]
-endif::[]
-
-.service.yaml
-[source,yaml,linenums,subs="attributes+,+macros"]
-----
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: event-greeter
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        metadata:
-          labels:
-            app: event-greeter
-        spec:
-          container:
-            image: {greeter-image}
+include::ROOT:example$05-eventing/service.yaml[]
 ----
 
 [#eventing-deploy-service]

@@ -2,13 +2,8 @@
 include::_attributes.adoc[]
 
 //Define vars
-ifdef::workshop[]
 :greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
-endif::[]
-
-ifndef::workshop[]
-:greeter-image:  docker.io/demo/event-greeter:0.0.1
-endif::[]
+:service-file: service.yaml
 
 [#eventing-source]
 == Event Source
@@ -22,21 +17,11 @@ include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
 .link:{github-repo}/{eventing-repo}/knative/event-source-svc.yaml[event-source-svc.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: CronJobSource #<1>
-metadata:
-  name: event-greeter-cronjob-source
-spec:
-  schedule: "* * * * *"
-  data: '{"message": "Thanks for doing the Knative Tutorial"}'
-  sink: 
-    apiVersion: serving.knative.dev/v1alpha1
-    kind: Service
-    name: event-greeter #<2>
+include::ROOT:example$05-eventing/event-source-svc.yaml[]
 ----
 
-<1> The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
-<2> The service(sink) where the event data will be sent
+- The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
+- The service(sink) where the event data will be sent
 
 [NOTE]
 ====
@@ -101,41 +86,10 @@ include::partial$eventing-snippets.adoc[tag=cronjob-source]
 
 Run the following command to create the Knative service that will be used as the subscriber for the cron events:
 
-ifdef::workshop[]
-[#eventing-run-gen-sink-service]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image '{greeter-image}'
-----
-copyToClipboard::eventing-run-gen-sink-service[]
-endif::[]
-
-ifndef::workshop[]
-[#eventing-run-gen-sink-service]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image pass:[$DESTINATION_IMAGE_NAME]
-----
-copyToClipboard::eventing-run-gen-sink-service[]
-endif::[]
-
-.service.yaml
+.link:{github-repo}/{eventing-repo}/knative/service.yaml[service.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: event-greeter
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        metadata:
-          labels:
-            app: event-greeter
-        spec:
-          container:
-            image: {greeter-image}
+include::ROOT:example$05-eventing/service.yaml[]
 ----
 
 [#eventing-deploy-sink-service]

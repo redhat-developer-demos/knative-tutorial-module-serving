@@ -2,13 +2,7 @@
 include::_attributes.adoc[]
 
 //Define vars
-ifdef::workshop[]
 :greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
-endif::[]
-
-ifndef::workshop[]
-:greeter-image:  docker.io/demo/event-greeter:0.0.1
-endif::[]
 
 [#eventing-channel]
 == Channel(Sink)
@@ -20,15 +14,7 @@ The https://en.wikipedia.org/wiki/Event-driven_architecture#Event_channel[channe
 .link:{github-repo}/{eventing-repo}/knative/channel.yaml[channel.yaml]
 [source,yaml,linenums]
 ----
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Channel
-metadata:
-  name: ch-event-greeter #<1>
-spec:
-  provisioner: #<2>
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: in-memory-channel
+include::ROOT:example$05-eventing/channel.yaml[]
 ----
 
 <1> The name of the channel. Knative makes it addressable, i.e. resolveable to a target (a consumer service)
@@ -92,17 +78,7 @@ The event source listens to external events e.g. a kafka topic or for a file on 
 .link:{github-repo}/{eventing-repo}/knative/event-source.yaml[event-source.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: CronJobSource #<1>
-metadata:
-  name: event-greeter-cronjob-source
-spec:
-  schedule: "* * * * *"
-  data: '{"message": "Thanks for doing the Knative Tutorial"}'
-  sink: 
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Channel
-    name: ch-event-greeter #<2>
+include::ROOT:example$05-eventing/event-source.yaml[]
 ----
 
 <1> The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
@@ -173,26 +149,8 @@ The event subscription is responsible of connecting the channel(sink) with the s
 .link:{github-repo}/{eventing-repo}/knative/channel-subscriber.yaml[channel-subscriber.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Subscription
-metadata:
-  name: event-greeter-subscriber #<1>
-  namespace: default
-spec:
-  channel:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Channel
-    name: ch-event-greeter #<2>
-  subscriber:
-    ref:
-      apiVersion: serving.knative.dev/v1alpha1
-      kind: Service
-      name: event-greeter #<3>
+include::ROOT:example$05-eventing/channel-subscriber.yaml[]
 ----
-
-<1> The subscription name
-<2> The name of the channel to which the subscription will be connected to
-<3> The service reference to which the channel will forward the events
 
 Run the following commands to create the channel subscriber:
 
@@ -261,41 +219,10 @@ TIP: Add `-oyaml` to the above commands to get more details about each object th
 
 Run the following command to create the knative service that will be used as the subscriber for the cron events:
 
-ifndef::workshop[]
-[#eventing-run-create-service]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image pass:[$DESTINATION_IMAGE_NAME]
-----
-copyToClipboard::eventing-run-create-service[]
-endif::[]
-
-ifdef::workshop[]
-[#eventing-run-create-service]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-yq w -i service.yaml spec.runLatest.configuration.revisionTemplate.spec.container.image '{greeter-image}'
-----
-copyToClipboard::eventing-run-create-service[]
-endif::[]
-
-.service.yaml 
+.link:{github-repo}/{eventing-repo}/knative/service.yaml[service.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: event-greeter
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        metadata:
-          labels:
-            app: event-greeter
-        spec:
-          container:
-            image: {greeter-image}
+include::ROOT:example$05-eventing/service.yaml[]
 ----
 
 [#eventing-deploy-subscriber-service]
