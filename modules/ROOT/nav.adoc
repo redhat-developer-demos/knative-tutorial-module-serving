@@ -2,7 +2,7 @@
 ** xref:01-setup.adoc#prerequisite[Prerequisites]
 ** xref:01-setup.adoc#download-tutorial-sources[Download Tutorial Sources]
 ifndef::workshop[]
-** xref:01-setup.adoc#kubernetes-cluster[Kubernetes Cluster]
+** xref:01-setup.adoc#kubernetes-cluster[Choose your Kubernetes Cluster]
 endif::[]
 ifdef::workshop[]
 ** xref:01-setup.adoc#kubernetes-cluster[OpenShift Cluster]
