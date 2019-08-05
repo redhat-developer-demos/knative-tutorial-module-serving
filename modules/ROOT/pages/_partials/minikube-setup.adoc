@@ -65,7 +65,7 @@ istio-ingressgateway-776c54f7c4-m9qz2    2/2     Running     0          69s
 **Install Custom Resource Definitions**
 
 [#run-knative-crd-install]
-[spource,bash,subs="+macros,+attributes"]
+[source,bash,subs="+macros,+attributes"]
 ----
 kubectl apply --selector knative.dev/crd-install=true \
   --filename {knative-serving-repo}/{knative-serving-version}/serving.yaml \

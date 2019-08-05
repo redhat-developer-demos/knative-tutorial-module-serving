@@ -1,22 +1,14 @@
 = Basics and Fundamentals
 include::_attributes.adoc[]
 
-ifdef::workshop[]
-:service-file: service.remote.yaml
-:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
-endif::[]
-
-ifndef::workshop[]
 :service-file: service.yaml
-:greeter-image: dev.local/rhdevelopers/greeter:0.0.1
-endif::[]
+:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
 
 At the end of this chapter you will be able to :
 
 * Deploy a Knative service.
 * Deploy multiple revisions of a service.
-* Choose between different service deployment strategies.
-* Run different revisions of a service.
+* Run different revisions of a service via traffic definition.
 
 ifndef::workshop[]
 [#basics-prerequisite]
@@ -24,9 +16,6 @@ ifndef::workshop[]
 
 include::partial$prereq-cli.adoc[]
 
-[#basics-build-containers]
-== Build Containers
-include::partial$build-containers.adoc[tag=greeter]
 endif::[]
 
 [#basics-deploy-service]
@@ -44,22 +33,10 @@ copyToClipboard::basics-nav-folder[]
 The following snippet shows what a Knative service YAML looks like:
 
 .link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
-[source,yaml,subs="attributes+,+macros"]
+[source,yaml,subs="+macros,attributes+"]
 ----
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: greeter
-spec:
-  runLatest: #<1>
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: {greeter-image}
+include::ROOT:example$02-basics/{service-file}[]
 ----
-
-<1> Makes Knative always run the latest revision of the deployment
 
 The service can be deployed using the following command:
  
@@ -108,7 +85,7 @@ endif::[]
 ifndef::workshop[]
 [tabs]
 ====
-Minikube::
+Kubernetes::
 +
 --
 :k8s-env: minikube
@@ -116,19 +93,19 @@ Minikube::
 :doc-sec: bis
 include::ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
 --
-Minishift::
+OpenShift::
 +
 --
-:k8s-env: minishift
+:k8s-env: openshift
 :k8s-cli: oc
 :doc-sec: bis
-include::ROOT:partial$invoke-service.adoc[tags=*;!workshop-call;!workshop-call-params]
+include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
 --
 ====
 endif::[]
 
 ifdef::workshop[]
-:k8s-env: minishift
+:k8s-env: openshift
 :k8s-cli: oc
 :doc-sec: bis-01
 include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
@@ -185,33 +162,15 @@ To deploy a new revision of the greeter service, we will add an environment vari
 [#basics-service-rev2]
 === Service revision 2
 
-ifndef::workshop[]
 :service-file: service-env.yaml
-endif::[]
-ifdef::workshop[]
-:service-file: service-env.remote.yaml
-endif::[]
 
 .link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
-[source,yaml,linenums,subs="attributes+,+macros"]
+[source,yaml,subs="+macros,attributes+"]
 ----
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: greeter
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: {greeter-image}
-            env:
-             - name: MESSAGE_PREFIX #<1>
-               value: Namaste
+include::ROOT:example$02-basics/{service-file}[]
 ----
 
-<1> Adding an environment variable that will be used as the message prefix
+Adding an environment variable that will be used as the message prefix
 
 Let us deploy the new revision using the command:
 
@@ -221,9 +180,9 @@ Let us deploy the new revision using the command:
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
 
-After successful deployment of the service we should see a Kubernetes deployment called `greeter-cqgcf-deployment`.
+After successful deployment of the service we should see a Kubernetes deployment called `greeter-v2-deployment`.
 
-Now if you list revisions, you will see two of them, named similar to `greeter-cqgcf` and `greeter-nsrbr`.
+Now if you list revisions, you will see two of them, named similar to `greeter-v1` and `greeter-v2`.
 
 [#rev2-basics-show-knative-revisions]
 === revisions
@@ -232,19 +191,14 @@ include::partial$knative-objects.adoc[tag=knative-revisions]
 
 <<basics-invoke-service,Invoking Service>> will now show an output like **Namaste  greeter => '6fee83923a9f' : 1**, where __Namaste__ is the value we configured via environment variable in the Knative service resource file.
 
-ifndef::workshop[]
 :service-file: service-pinned.yaml
-endif::[]
-ifdef::workshop[]
-:service-file: service-pinned.remote.yaml
-endif::[]
 
 [#basics-pinning-revision]
 == Pinning Service to a Revision
 
-As you noticed, Knative service always routes traffic to the **latest** revision of the service deployment, due to the **runLatest** attribute in the <<basics-service-rev2,service resource file>>.
+As you noticed, Knative service always routes traffic to the **latest** revision of the service deployment. It is possible to split the traffic amongst the available revisions. 
 
-Let us now make the greeter service use the first revision created, the one using the default `MESSAGE_PREFIX`.
+As we already know the at got two revisions namely `greeter-v1` and `greeter-v2`. The `traffic` block in the Knative `service` specification helps in pinning a service to a particular revision or split traffic among multiple revisions.
 
 [TIP]
 ====
@@ -256,38 +210,17 @@ You can use the <<rev1-basics-show-knative-revisions, show Knative service revis
 .link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
 [source,yaml,linenums,subs="attributes+,+macros"]
 ----
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: greeter
-spec:
-  release: #<1>
-    revisions:
-    - greeter-nsrbr
-  configuration:
-    revisionTemplate:
-      spec:
-        container:
-          image: {greeter-image}
-          env:
-            - name: MESSAGE_PREFIX
-              value: Namaste
-          livenessProbe:
-            httpGet:
-              path: /healthz
-          readinessProbe:
-            httpGet:
-              path: /healthz
+include::ROOT:example$02-basics/{service-file}[]
 ----
 
-<1> The **release** attribute in the service resource file will make Knative use the revision specified in the **revisions** attribute.
+The above service definition creates three sub-routes(named after traffic **tags**) to existing `greeter` route.
 
-[IMPORTANT]
-====
-The names of revisions may be different in your setup
-====
+- **current** - The revision is going to have all 100% traffic distribution
+- **prev** - The previously active revision, which will now have zero traffic 
+- **latest** - The route pointing to any latest service deployment, by setting to zero we are making sure the latest revision is not picked up automatically.
 
-Let us redeploy the greeter service by pinning it to the first revision that was created:
+Let us redeploy the greeter service by pinning it to the `greeter-v1`:
+
 ifndef::workshop[]
 [tabs]
 ====
@@ -297,8 +230,7 @@ kubectl::
 [#run-pinned-revision]
 [source,bash,subs="+macros,+attributes"]
 ----
-PIN_REVISION=`kubectl get rev -n {tutorial-namespace} -l serving.knative.dev/service=greeter -l serving.knative.dev/configurationGeneration=1 | awk 'NR==2{print $1}'` && \
-cat {service-file} | yq w - "spec.release.revisions[+]" $PIN_REVISION | kubectl -n {tutorial-namespace} apply -f -
+kubectl -n {tutorial-namespace} apply -f {service-file}
 ----
 copyToClipboard::run-pinned-revision[]
 --
@@ -309,8 +241,7 @@ endif::[]
 [#run-oc-pinned-revision]
 [source,bash,subs="+macros,+attributes"]
 ----
-PIN_REVISION=`oc get rev -n {tutorial-namespace} -l serving.knative.dev/service=greeter -l serving.knative.dev/configurationGeneration=1 | awk 'NR==2{print $1}'` && \
-cat {service-file} | yq w - "spec.release.revisions[+]" $PIN_REVISION | oc -n {tutorial-namespace}  apply -f -
+oc -n {tutorial-namespace}  apply -f {service-file}
 ----
 copyToClipboard::run-oc-pinned-revision[]
 ifndef::workshop[]
@@ -318,7 +249,57 @@ ifndef::workshop[]
 ====
 endif::[]
 
+Let us list the available sub-routes:
+
+[tabs]
+====
+kubectl::
++
+--
+[#run-traffic-sub-routes]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl -n {tutorial-namespace} get ksvc greeter -oyaml \
+ | yq r - 'status.traffic[*].url'
+----
+copyToClipboard::run-traffic-sub-routes[]
+--
+oc::
++
+--
+[#run-oc-traffic-sub-routes]
+[source,bash,subs="+macros,+attributes"]
+----
+oc -n {tutorial-namespace} get ksvc greeter -oyaml \
+  | yq r - 'status.traffic[*].url'
+----
+copyToClipboard::run-oc-traffic-sub-routes[]
+ifndef::workshop[]
+--
+====
+
+The above command should return you three sub-routes for the main `greeter` route:
+
+[source,bash,subs="+macros,attributes"]
+----
+- http://current-greeter.knativetutorial.example.com #<1>
+- http://prev-greeter.knativetutorial.example.com #<2>
+- http://latest-greeter.knativetutorial.example.com #<3>
+----
+
+<1> the sub route for the traffic tag `current`
+<2> the sub route for the traffic tag `prev`
+<3> the sub route for the traffic tag `latest`
+
 <<basics-invoke-service,Invoking Service>> will produce output similar to **Hi  greeter => '6fee83923a9f' : 1**
+
+As per the current traffic distribution, the `greeter` route will always return response from revision `greeter-v1` (traffic tag `current`)
+
+[TIP]
+====
+* If you are in vanilla Kubernetes cluster you can also try the using the above urls in the `Host` header of the http command to see them scaling the respective deployments to get the result.
+* If you are on OpenShift then you can directly invoke the urls
+====
 
 [#basics-cleanup]
 == Cleanup
