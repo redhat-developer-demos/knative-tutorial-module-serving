@@ -200,13 +200,13 @@ copyToClipboard::scaling-run-siege[]
 OpenShift::
 +
 --
-[#scaling-run-siege]
+[#oc-scaling-run-siege]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
 siege -r 1 -c 50 -t 30S \
   "pass:[${SVC_URL}]/?sleep=3&upto=10000&memload=100"
 ----
-copyToClipboard::scaling-run-siege[]
+copyToClipboard::oc-scaling-run-siege[]
 --
 ====
 

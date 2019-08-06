@@ -17,8 +17,8 @@ The https://en.wikipedia.org/wiki/Event-driven_architecture#Event_channel[channe
 include::ROOT:example$05-eventing/channel.yaml[]
 ----
 
-<1> The name of the channel. Knative makes it addressable, i.e. resolveable to a target (a consumer service)
-<2> The channel provisioner which is responsible for provisioning this channel. Various messaging implementations provide their own channel(s) via __ClusterChannelProvisioner__.
+- The name of the channel. Knative makes it addressable, i.e. resolveable to a target (a consumer service)
+- The channel provisioner which is responsible for provisioning this channel. Various messaging implementations provide their own channel(s) via __ClusterChannelProvisioner__.
 
 include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
 
@@ -81,8 +81,8 @@ The event source listens to external events e.g. a kafka topic or for a file on 
 include::ROOT:example$05-eventing/event-source.yaml[]
 ----
 
-<1> The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
-<2> The channel(sink) where the event data will be drained
+- The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
+- The channel(sink) where the event data will be drained
 
 [NOTE,subs="macros+"]
 ====
