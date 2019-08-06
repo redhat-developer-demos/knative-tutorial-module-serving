@@ -6,15 +6,15 @@ https://github.com/knative/client[Knative Client] is the command line utility ai
 
 At the end of this chapter you will be able to :
 
-* Install Knative client 
-* Create, update, list and delete knative service
-* Create, update, list and delete knative service revisions
-* List knative service routes
+* Install Knative Client 
+* Create, update, list and delete Knative service
+* Create, update, list and delete Knative service revisions
+* List Knative service routes
 
 [WARNING]
 ====
 * Knative Client (`kn`) is still under aggressive development, so commands and options might change rapidly. 
-* As of writing the tutorial v0.2.0 was the latest version of the knative client
+* As of writing the tutorial v0.2.0 was the latest version of the Knative Client
 ====
 
 [#kn-install]
@@ -174,12 +174,12 @@ Service 'greeter' successfully deleted in namespace 'knativetutorial'.
 [#kn-revisions]
 == Knative Revision Commands
 
-The `kn` revision commands are used to interact with revision(s) of knative service.
+The `kn` revision commands are used to interact with revision(s) of Knative service.
 
 [#kn-revisions-list]
 === List Revisions
 
-You can list the available revisions of a knative service using:
+You can list the available revisions of a Knative service using:
 
 [#run-kn-list-rev]
 [source,bash,subs="+macros,attributes+"]
@@ -240,7 +240,7 @@ Now <<kn-invoke-service, invoking service>> will return the response from revisi
 [#kn-routes]
 == Knative Route Commands
 
-The `kn` revision commands are used to interact with route(s) of knative service.
+The `kn` revision commands are used to interact with route(s) of Knative service.
 
 [#kn-routes-list]
 === List Routes
