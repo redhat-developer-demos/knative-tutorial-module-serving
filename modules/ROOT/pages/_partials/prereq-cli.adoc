@@ -3,7 +3,7 @@ The following checks ensure that each chapter exercises are done with the right 
 
 [tabs]
 ====
-Minikube::
+Kubernetes::
 +
 --
 * Set your local docker to use minikube docker daemon
@@ -24,24 +24,14 @@ kubectl version
 ----
 copyToClipboard::kubectl-version[]
 --
-Minishift::
+OpenShift::
 +
 --
-* Set your local docker to use minishift docker daemon 
-
-[#minishift-set-env]
-[source,bash,subs="+macros,+attributes"]
-----
-eval $(minishift docker-env)
-----
-copyToClipboard::minishift-set-env[]
-
-* OpenShift CLI should be v3.11.0+
+* OpenShift CLI should be v4.1+
 
 [#oc-version]
 [source,bash,subs="+macros,+attributes"]
 ----
-eval $(minishift oc-env)
 oc version 
 ----
 copyToClipboard::oc-version[]

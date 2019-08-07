@@ -2,46 +2,44 @@
 
 **OpenShift**
 
-For OpenShift Knative installations we will use the OpenShift Cloud Function's https://github.com/openshift-cloud-functions/knative-operators[Knative Operators].
+Knative Serving and Eventing install needs OpenShift v4.x, you need to have one provisioned using https://try.openshift.com[try.openshift.com]or can use any existing OpenShift4 cluster.
 
-Clone the Knative Operator sources locally:
+Once you have your cluster, you can download the latest OpenShift client(oc) from https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/[here] and add to your path.
 
-[#setup-ocp-kn-operator]
-[source,bash,subs="+macros,+attributes"]
------
-cd $TUTORIAL_HOME \
-git clone https://github.com/openshift-cloud-functions/knative-operators \
-cd knative-operators
------
-copyToClipboard::setup-ocp-kn-operator[]
+We will be using https://coreos.com/operators/[Kubernetes Operators] to install Knative serving and eventing components on OpenShift. OpenShift is integrated with https://operatorhub.io/[OperatorHub] that allows you to install the components(using Kubernetes operators) from within OpenShift web console.
 
-**OpenShift Container Platform**
+[IMPORTANT]
+=====
+The Knative components are right now available as community components and is currently not supported by Red Hat.
+=====
 
-If you have an existing OpenShift cluster then run the following commands:
+Login to OpenShift console using the cluster admin credentials.
 
-[#run-ocp-kn-operator]
-[source,bash,subs="+macros,+attributes"]
------
-./etc/scripts/install.sh
------
-copyToClipboard::run-ocp-kn-operator[]
+* Select Knative Operators via OperatorHub
 
-If you need more details about the installation or customizations refer https://github.com/openshift-cloud-functions/Documentation/blob/master/knative-OCP.md[Knative with OpenShift].
+image::select_knative_operators.png[]
 
-**minishift**
+* Select and Install Knative Serving
 
-Download Minishift from https://github.com/minishift/minishift/releases and add it your path.
+image::select_kn_serving.png[]
+image::install_knative_serving.png[]
 
-Run the following commands to configure Knative with minishift:
+* Subscribe Knative Serving
 
-[#run-ocp-kn-operator-minishift]
-[source,bash,subs="+macros,+attributes"]
------
-./etc/scripts/install-on-minishift.sh #<1>
------
-copyToClipboard::run-ocp-kn-operator-minishift[]
+image::create_knative_serving_sub.png[]
 
-<1> It will create a minishift profile and install Knative. It also assumes that you already have minishift and your computer has 10GB or more of memory.
+image::subscribed_knative_serving.png[]
+
+* Select and Install Knative Eventing
+
+image::select_kn_eventing.png[]
+image::install_knative_eventing.png[]
+
+* Subscribe Knative Eventing
+
+image::create_knative_eventing_sub.png[]
+
+image::subscribed_knative_eventing.png[]
 
 **Configuring OpenShift project for Knative applications**
 
@@ -54,4 +52,4 @@ oc adm policy add-scc-to-user anyuid -z default
 ----
 copyToClipboard::run-ocp-project-config[]
 
-<1> The `oc adm policy` adds the **privileged** https://docs.okd.io/3.10/admin_guide/manage_scc.html[Security Context Constraints (SCCs)] to the **default** Service Account. The SCCs are the precursor to the PSP (Pod Security Policy) mechanism in Kubernetes.
+<1> The `oc adm policy` adds the **privileged** https://docs.openshift.com/container-platform/4.1/authentication/managing-security-context-constraints.html[Security Context Constraints (SCCs)] to the **default** Service Account. The SCCs are the precursor to the PSP (Pod Security Policy) mechanism in Kubernetes.

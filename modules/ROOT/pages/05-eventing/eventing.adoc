@@ -15,8 +15,6 @@ ifndef::workshop[]
 [#eventing-prerequisite]
 == Prerequisite 
 include::partial$prereq-cli.adoc[]
-
-include::partial$set-env-vars.adoc[]
 endif::[]
 
 [#eventing-watch-logs]

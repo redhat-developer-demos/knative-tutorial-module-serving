@@ -1,0 +1,276 @@
+= Knative Client
+:experimental:
+:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+
+https://github.com/knative/client[Knative Client] is the command line utility aimed at enhancing the developer experience when doing Knative Serving and Eventing tasks.
+
+At the end of this chapter you will be able to :
+
+* Install Knative Client 
+* Create, update, list and delete Knative service
+* Create, update, list and delete Knative service revisions
+* List Knative service routes
+
+[WARNING]
+====
+* Knative Client (`kn`) is still under aggressive development, so commands and options might change rapidly. 
+* As of writing the tutorial v0.2.0 was the latest version of the Knative Client
+====
+
+[#kn-install]
+== Install
+
+Download the https://github.com/knative/client/releases/tag/v0.2.0[latest] Knative Client and add to your `PATH`.
+
+Verify installation by running the command:
+
+[#kn-verify-install]
+[source,bash]
+----
+kn version
+----
+copyToClipboard::kn-verify-install[]
+
+The above command will return a response like 
+
+[source,bash]
+----
+Version:      v0.2.0
+Build Date:   2019-07-10 20:57:03
+Git Revision: e1614f9
+Dependencies:
+- serving:    v0.6.0
+----
+
+[#kn-ksvc]
+== Knative Service Commands
+
+In the  xref:02-basic-fundas.adoc[previous chapter] you created, updated and deleted the Knative service using the YAML and kubectl/oc command line tools.
+
+We will perform the same operations in this chapter but with `kn`: 
+
+[#kn-create-ksvc]
+=== Create Service
+
+To create the `greeter` service using `kn` run the following command:
+
+[#kn-create-ksvc-greeter]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service create greeter --namespace {tutorial-namespace} --image {greeter-image}
+----
+copyToClipboard::kn-create-ksvc-greeter[]
+
+A successful create of the `greeter` service should show a response like 
+
+[source,bash]
+----
+Service 'greeter' successfully created in namespace 'knativetutorial'.
+Waiting for service 'greeter' to become ready ... OK
+
+Service URL:
+http://greeter.knativetutorial.example.com
+----
+
+[#kn-list-services]
+=== List Knative Services
+
+You can list the created services using the command:
+
+[#kn-list-ksvc]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service list --namespace {tutorial-namespace}
+----
+copyToClipboard::kn-list-ksvc[]
+
+[#kn-invoke-service]
+=== Invoke Service
+ifndef::workshop[]
+[tabs]
+====
+Kubernetes::
++
+--
+:k8s-env: minikube
+:k8s-cli: kubectl
+:doc-sec: bis
+include::ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
+--
+OpenShift::
++
+--
+:k8s-env: openshift
+:k8s-cli: oc
+:doc-sec: bis
+include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
+--
+====
+endif::[]
+
+You can xref:02-basic-fundas.adoc#basics-see-what-you-have-deployed[verify] what you the kn client has deployed, to make sure its inline with what you have see in previous chapter.
+
+[#kn-update-ksvc]
+=== Update Knative Service
+
+To create a new revision using `kn` is as easy as running another command.
+
+In previous chapter we deployed a new revision of Knative service by adding an environment variable. Lets try do the same thing with `kn` to trigger a new deployment:
+
+[#run-kn-update-ksvc]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service update greeter --env "MESSAGE_PREFIX=Namaste"
+----
+copyToClipboard::run-kn-update-ksvc[]
+
+Now <<kn-invoke-service,Invoking the service>> will return me a response like **Namaste  greeter => '9861675f8845' : 1**
+
+[#kn-desc-ksvc]
+=== Describe Knative Service
+
+Sometime you wish you get the YAML of the Knative service to build a new service or to compare with with another service. `kn` makes it super easy for you to get the YAML:
+
+[#run-kn-desc-ksvc]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service describe greeter
+----
+copyToClipboard::run-kn-desc-ksvc[]
+
+The describe should show you an exhaustive YAML like
+
+[source,yaml]
+----
+include::ROOT:example$03-knative-client/kn_ksvc_desc.yaml[]
+----
+
+[#kn-delete-ksvc]
+=== Delete Knative Service
+
+[NOTE]
+====
+If you are going to work with other `kn` commands <<kn-revisions,Revisions>> and <<kn-routes,Routes>>, then run these exercises after those commands
+====
+
+You can also use `kn` to delete the service that were created, to delete the service named `greeter` run the following command:
+
+[#run-kn-delete-ksvc]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service delete greeter
+----
+copyToClipboard::run-kn-delete-ksvc[]
+
+A successful delete should show an output like 
+
+[source,bash]
+----
+Service 'greeter' successfully deleted in namespace 'knativetutorial'.
+----
+
+<<kn-list-services,Listing services>> you will notice that the `greeter` service no longer exists.
+
+[#kn-revisions]
+== Knative Revision Commands
+
+The `kn` revision commands are used to interact with revision(s) of Knative service.
+
+[#kn-revisions-list]
+=== List Revisions
+
+You can list the available revisions of a Knative service using:
+
+[#run-kn-list-rev]
+[source,bash,subs="+macros,attributes+"]
+----
+kn revision list
+----
+copyToClipboard::run-kn-list-rev[]
+
+The command should show a list of revisions like
+
+[source,bash]
+----
+NAME            SERVICE   AGE   CONDITIONS   READY   REASON
+greeter-7cqzq   greeter   11s   4 OK / 4     True
+greeter-qctxv   greeter   56s   4 OK / 4     True
+----
+
+[#kn-revisions-desc]
+=== Describe Revision
+
+To get the details about a specific revision you can use the command:
+
+[#run-kn-desc-rev]
+[source,bash,subs="+macros,attributes+"]
+----
+kn revision describe greeter-7cqzq
+----
+copyToClipboard::run-kn-desc-rev[]
+
+The command should return a YAML like
+
+[source,yaml]
+----
+include::ROOT:example$03-knative-client/kn_rev_desc.yaml[]
+----
+
+[#kn-revisions-delete]
+=== Delete Revision
+
+To delete a specific revision you can use the command:
+
+[#run-kn-del-rev]
+[source,bash,subs="+macros,attributes+"]
+----
+kn revision delete greeter-7cqzq
+----
+copyToClipboard::run-kn-del-rev[]
+
+The command should return an output like
+
+[source,bash]
+----
+Revision 'greeter-7cqzq' successfully deleted in namespace 'knativetutorial'.
+----
+
+Now <<kn-invoke-service, invoking service>> will return the response from revision `greeter-6m45j`.
+
+[#kn-routes]
+== Knative Route Commands
+
+The `kn` revision commands are used to interact with route(s) of Knative service.
+
+[#kn-routes-list]
+=== List Routes
+
+[#run-kn-rt-list]
+[source,bash,subs="+macros,attributes+"]
+----
+kn route list
+----
+copyToClipboard::run-kn-rt-list[]
+
+The command should return an output like
+
+[source,bash]
+----
+NAME      URL                                          AGE   CONDITIONS   TRAFFIC
+greeter   http://greeter.knativetutorial.example.com   10m   3 OK / 3     100% -> greeter-zd7jk
+----
+
+[TIP]
+====
+As an exercise you can run the exercises of xref:02-basic-fundas.adoc[previous chapter] and try listing the routes using `kn`.
+====
+
+[#kn-cleanup]
+== Cleanup
+
+[#cleanup-kn-delete-ksvc]
+[source,bash,subs="+macros,attributes+"]
+----
+kn service delete greeter
+----
+copyToClipboard::cleanup-kn-delete-ksvc[]
