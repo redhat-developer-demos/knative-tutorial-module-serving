@@ -17,16 +17,26 @@ include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
 .link:{github-repo}/{eventing-repo}/knative/event-source-svc.yaml[event-source-svc.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-include::ROOT:example$05-eventing/event-source-svc.yaml[]
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: CronJobSource #<1>
+metadata:
+  name: event-greeter-cronjob-source
+spec:
+  schedule: "* * * * *"
+  data: '{"message": "Thanks for doing Knative Tutorial"}'
+  sink: #<2>
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    name: event-greeter
 ----
 
-- The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
-- The service(sink) where the event data will be sent
+<1> The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
+<2> The service(sink) where the event data will be sent
 
 [NOTE]
 ====
 Event Source can define the attributes that it wishes to receive via the 
-spec.  In the above example it defines **schedule**(the the cron expression) and **data** that will be sent as part of the event.
+spec.  In the above example it defines **schedule**(the cron expression) and **data** that will be sent as part of the event.
 
 When you xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs], you will notice this data being delivered to the service.
 ====
