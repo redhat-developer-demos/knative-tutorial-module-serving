@@ -251,6 +251,7 @@ endif::[]
 
 Let us list the available sub-routes:
 
+ifndef::workshop[]
 [tabs]
 ====
 kubectl::
@@ -267,6 +268,7 @@ copyToClipboard::run-traffic-sub-routes[]
 oc::
 +
 --
+endif::[]
 [#run-oc-traffic-sub-routes]
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -277,6 +279,7 @@ copyToClipboard::run-oc-traffic-sub-routes[]
 ifndef::workshop[]
 --
 ====
+endif::[]
 
 The above command should return you three sub-routes for the main `greeter` route:
 
@@ -297,8 +300,10 @@ As per the current traffic distribution, the `greeter` route will always return 
 
 [TIP]
 ====
+ifndef::workshop[]
 * If you are in vanilla Kubernetes cluster you can also try the using the above urls in the `Host` header of the http command to see them scaling the respective deployments to get the result.
-* If you are on OpenShift then you can directly invoke the urls
+endif::[]
+* If you are on OpenShift then you can directly invoke the urls to see the response of those respective revision
 ====
 
 [#basics-cleanup]
