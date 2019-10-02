@@ -1,6 +1,7 @@
 = Setup
 include::_attributes.adoc[]
 
+ifndef::workshop[]
 [[prerequisite]]
 == Prerequisite CLI tools
 
@@ -106,6 +107,7 @@ OpenShift::
 include::partial$openshift-setup.adoc[]
 --
 ====
+endif::[]
 endif::[]
 
 ifdef::workshop[]
