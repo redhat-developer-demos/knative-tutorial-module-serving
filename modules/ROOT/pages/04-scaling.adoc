@@ -181,7 +181,7 @@ Kubernetes::
 [source,bash,subs="attributes+,+macros",linenums]
 ----
 hey -c 50 -z 10s \
-  -H "Host:greeter.knativetutorial.example.com" \
+  -H "Host:prime-generator.knativetutorial.example.com" \
   "http://pass:[${IP_ADDRESS}]/?sleep=3&upto=10000&memload=100"
 ----
 copyToClipboard::scaling-run-siege[]
@@ -241,7 +241,7 @@ include::ROOT:example$04-scaling/{service-file}[]
 :url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
-After the deployment was successful we should see a Kubernetes Deployment called `greeter-v2-deployment` with **two** pods available.
+After the deployment was successful we should see a Kubernetes Deployment called `prime-generator-v2-deployment` with **two** pods available.
 
 Open a new terminal and run the following command :
 
@@ -282,7 +282,8 @@ kubectl::
 [#run-scaling-cleanup]
 [source,bash,subs="attributes+,+macros"]
 ----
-kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter
+kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter  &&\
+kubectl -n {tutorial-namespace} delete services.serving.knative.dev prime-generator
 ----
 copyToClipboard::run-scaling-cleanup[]
 --
@@ -293,7 +294,8 @@ endif::[]
 [#run-oc-scaling-cleanup]
 [source,bash,subs="attributes+,+macros"]
 ----
-oc -n {tutorial-namespace} delete services.serving.knative.dev greeter
+oc -n {tutorial-namespace} delete services.serving.knative.dev greeter &&\
+oc -n {tutorial-namespace} delete services.serving.knative.dev prime-generator
 ----
 copyToClipboard::run-oc-scaling-cleanup[]
 ifndef::workshop[]
