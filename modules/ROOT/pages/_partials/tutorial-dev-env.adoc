@@ -1,18 +1,9 @@
-[#download-tutorial-sources]
-== Download Tutorial Sources
-Before we start setting up the environment, let's clone the tutorial sources and set the `TUTORIAL_HOME` environment variable to point to the root directory of the tutorial:
-
-[#cloneRepo]
-[source,bash,subs="attributes+,+macros"]
-----
-git clone -b {release-version} https://github.com/redhat-developer-demos/knative-tutorial &&\
-export TUTORIAL_HOME="$(pwd)/knative-tutorial"
-----
-copyToClipboard::cloneRepo[]
-
 ifndef::workshop[]
+[#tutorial-dev-env]
+== Development tutorial
+
 [#tutorial-prerequisite]
-== CLI tools
+=== CLI tools
 
 The following CLI tools are required for running the exercises in this tutorial. Please have them installed and configured before you get started with any of the tutorial chapters.
 
