@@ -50,11 +50,7 @@ registry-7c5hg                             1/1     Running   0          29m
 registry-proxy-cj6dj                       1/1     Running   0          29m
 ----
 
-**Deploy Registry Helper**
-
-As part of some exercises in the tutorial, we need to push and pull images to local internal registry. To make push and pull smoother we will have a helper deployed so that we can use some common names like `dev.local`, `example.com` as registry aliases for internal registry
-
-Navigate to registry helper folder:
+**Navigate to registry helper folder:**
 
 [#minikube-registry-helper-nav]
 [source,bash,subs="attributes+,+macros"]
@@ -62,6 +58,10 @@ Navigate to registry helper folder:
 cd $TUTORIAL_HOME/apps/minikube-registry-helper
 ----
 copyToClipboard::minikube-registry-helper-nav[]
+
+**Deploy Registry Helper**
+
+As part of some exercises in the tutorial, we need to push and pull images to local internal registry. To make push and pull smoother we will have a helper deployed so that we can use some common names like `dev.local`, `example.com` as registry aliases for internal registry
 
 **Add entries to minikube host file**
 
@@ -83,11 +83,9 @@ Check if the entries are added to minikube node host file
 [#minikube-check-host-entry]
 [source,bash,subs="attributes+,+macros"]
 ----
-cat /etc/node-hosts
+minikube ssh -- sudo cat /etc/hosts
 ----
 copyToClipboard::minikube-check-host-entry[]
-
-IMPORTANT: the node's `/etc/host` is mounted has `/etc/node-hosts` within the `tutorial-tools` pod
 
 A successful daemonset run will show the minikube node `/etc/hosts` file with the following entries:
 
@@ -110,6 +108,12 @@ kubectl get svc registry -n kube-system
 ----
 copyToClipboard::minikube-check-registry-ip[]
 ======
+
+[source,bash,subs="attributes+,+macros"]
+----
+NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
+registry   ClusterIP   10.111.151.121   <none>        80/TCP                  178m
+----
 
 **Update CoreDNS**
 
@@ -308,7 +312,7 @@ copyToClipboard::setup-knative-tutorial-ns[]
 
 [TIP]
 =====
-The kubens utility installed as part of https://github.com/ahmetb/kubectx[kubectx] allows for easy switching between Kubernetes namespaces.
+The https://github.com/ahmetb/kubens[kubens] utility installed as part of https://github.com/ahmetb/kubectx[kubectx] allows for easy switching between Kubernetes namespaces.
 
 [#setup-knative-tutorial-kubens]
 [source,bash,subs="+macros,+attributes"]
