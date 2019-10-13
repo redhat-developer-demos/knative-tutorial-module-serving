@@ -6,7 +6,7 @@
 :scaling-repo: 04-scaling
 :eventing-repo: 05-eventing
 :experimental:
-:minikube-version: v1.0.1
+:minikube-version: v1.4.0
 :knative-version: v0.7.1
 :openshift-version: v4.1+
 :knative-istio-version: 1.1.7
