@@ -7,7 +7,7 @@ ifndef::workshop[]
 endif::[]
 ** xref:01-setup.adoc#kubernetes-cluster[Choose your Kubernetes Cluster]
 ** xref:01-setup.adoc#tutorial-dev-env[Development Environment]
-*** xref:01-setup.adoc#tutorial-prerequisite[CLI Tools]
+*** xref:01-setup.adoc#tutorial-all-local[CLI Tools]
 *** xref:01-setup.adoc#dev-env-all-in-one[All in one Environment]
 
 * xref:02-basic-fundas.adoc[2. Basics and Fundamentals]
