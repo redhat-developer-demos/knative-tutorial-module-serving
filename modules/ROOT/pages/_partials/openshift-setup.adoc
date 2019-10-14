@@ -10,46 +10,73 @@ We will be using https://coreos.com/operators/[Kubernetes Operators] to install 
 
 [IMPORTANT]
 =====
-The Knative components are right now available as community components and is currently not supported by Red Hat.
+* The Knative Eventing components are right now available as community components and is currently not supported by Red Hat.
 =====
+
+**Login as admin**
 
 Login to OpenShift console using the cluster admin credentials.
 
-* Select Knative Operators via OperatorHub
+**Install catalog sources**
 
-image::select_knative_operators.png[]
-
-* Select and Install Knative Serving
-
-image::select_kn_serving.png[]
-image::install_knative_serving.png[]
-
-* Subscribe Knative Serving
-
-image::create_knative_serving_sub.png[]
-
-image::subscribed_knative_serving.png[]
-
-* Select and Install Knative Eventing
-
-image::select_kn_eventing.png[]
-image::install_knative_eventing.png[]
-
-* Subscribe Knative Eventing
-
-image::create_knative_eventing_sub.png[]
-
-image::subscribed_knative_eventing.png[]
-
-**Configuring OpenShift project for Knative applications**
-
-[#run-ocp-project-config]
+[#install-csc]
 [source,bash,subs="+macros,+attributes"]
 ----
-oc new-project knativetutorial
-oc adm policy add-scc-to-user privileged -z default #<1>
-oc adm policy add-scc-to-user anyuid -z default
+oc apply -f "pass:[$TUTORIAL_HOME]/install/redhat-operators-csc.yaml" \
+  -f "pass:[$TUTORIAL_HOME]/install/community-operators-csc.yaml" 
 ----
-copyToClipboard::run-ocp-project-config[]
+copyToClipboard::install-csc[]
 
-<1> The `oc adm policy` adds the **privileged** https://docs.openshift.com/container-platform/4.1/authentication/managing-security-context-constraints.html[Security Context Constraints (SCCs)] to the **default** Service Account. The SCCs are the precursor to the PSP (Pod Security Policy) mechanism in Kubernetes.
+It will take few minutes for the operators to be installed and reconciled, you can watch the status using the command:
+
+[#check-operators-status]
+[source,bash,subs="+macros,+attributes"]
+----
+watch 'oc get csv -n openshift-operators'
+----
+copyToClipboard::check-operators-status[]
+
+[NOTE]
+=====
+You can terminate the watch using the command kbd:[Ctrl+c]
+=====
+
+**Install Knative Serving**
+
+[#install-knative-serving]
+[source,bash,subs="+macros,+attributes"]
+----
+oc apply -f "pass:[$TUTORIAL_HOME]/install/knative-serving/subscription.yaml"
+----
+copyToClipboard::install-knative-serving[]
+
+It will take few minutes for the Knative serving components to be installed, you can watch the status using:
+
+[#check-knative-serving]
+[source,bash,subs="+macros,+attributes"]
+----
+oc get pods -n knative-serving -w 
+----
+copyToClipboard::check-knative-serving[]
+
+NOTE: You can terminate the watch using the command kbd:[Ctrl+c]
+
+**Install Knative Eventing**
+
+[#install-knative-eventing]
+[source,bash,subs="+macros,+attributes"]
+----
+oc apply -f "pass:[$TUTORIAL_HOME]/install/knative-eventing/subscription.yaml"
+----
+copyToClipboard::install-knative-eventing[]
+
+It will take few minutes for the Knative eventing components to be installed, you can watch the status using:
+
+[#check-knative-eventing]
+[source,bash,subs="+macros,+attributes"]
+----
+oc get pods -n knative-eventing -w 
+----
+copyToClipboard::check-knative-eventing[]
+
+NOTE: You can terminate the watch using the command kbd:[Ctrl+c]

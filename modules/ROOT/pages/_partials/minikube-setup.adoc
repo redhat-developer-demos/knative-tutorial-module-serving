@@ -1,27 +1,166 @@
 [#start-minikube]
-.**Configure and Start Minikube**
+**Configure and Start Minikube**
 
 Before installing Knative and its components, we need to create a Minikube virtual machine and deploy Kubernetes into it.
 
 Download https://kubernetes.io/docs/setup/minikube[minikube] and add it to your path.
 
-[[setup-minikube-start]]
+[#setup-minikube-start]
 [source,bash,subs="+macros,+attributes"]
 ----
-minikube profile knative #<1>
+minikube profile {tutorial-namespace} #<1>
 
-minikube start -p knative --memory=8192 --cpus=6 \#<2> 
-  --kubernetes-version=v1.12.0 \#<3> 
-  --vm-driver=hyperkit \#<4>  
+minikube start -p {tutorial-namespace} --memory=8192 --cpus=6 \#<1> 
+  --kubernetes-version=v1.14.0 \
+  --vm-driver=hyperkit \#<2>  
   --disk-size=50g \
-  --extra-config=apiserver.enable-admission-plugins="LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook"
+  --extra-config='apiserver.enable-admission-plugins=LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook' \
+  --insecure-registry='10.0.0.0/24' #<3>
 ----
 copyToClipboard::setup-minikube-start[]
 
 <1> Setting Minikube profile to **knative** so that all future Minikube commands are executed with this profile context
-<2> Starting a profile named **knative**
-<3> Minimum Kubernetes version needs to be 1.12, refer to issue https://github.com/knative/serving/issues/3067 for more details.
-<4> On macOS. On Linux, please use `--vm-driver=kvm2`
+<2> On macOS/windows. On Linux, please use `--vm-driver=kvm2`
+<3> Make the internal registry to be insecure registry
+
+[#minikube-enable-registry]
+**Enable Internal Registry**
+
+[#minikube-enable-registry-run]
+[source,bash,subs="+macros,attributes+"]
+----
+minikube addons enable registry
+----
+copyToClipboard::minikube-enable-registry-run[]
+
+NOTE: It will take few mins for the registry to be enabled, you can watch the status using `kubectl get pods -n kube-system -w  | grep registry`
+
+A successful enable of <<minikube-enable-registry,registry>> will show the following pods when running the command:
+
+[#minikube-check-registry]
+[source,bash,subs="attributes+,+macros"]
+----
+kubectl get pods -n kube-system | grep registry
+----
+copyToClipboard::minikube-check-registry[]
+
+[source,bash]
+----
+registry-7c5hg                             1/1     Running   0          29m
+registry-proxy-cj6dj                       1/1     Running   0          29m
+----
+
+**Navigate to registry helper folder:**
+
+[#minikube-registry-helper-nav]
+[source,bash,subs="attributes+,+macros"]
+----
+cd $TUTORIAL_HOME/apps/minikube-registry-helper
+----
+copyToClipboard::minikube-registry-helper-nav[]
+
+**Deploy Registry Helper**
+
+As part of some exercises in the tutorial, we need to push and pull images to local internal registry. To make push and pull smoother we will have a helper deployed so that we can use some common names like `dev.local`, `example.com` as registry aliases for internal registry
+
+**Add entries to minikube host file**
+
+[#minikube-add-entry-to-host]
+[source,bash,subs="attributes+,+macros"]
+----
+kubectl apply -n kube-system -f registry-aliases-config.yaml &&\
+kubectl apply -n kube-system -f node-etc-hosts-update.yaml
+----
+copyToClipboard::minikube-add-entry-to-host[]
+
+[IMPORTANT]
+=====
+Wait for the Daemonset to be running before proceeding to next step, the status of the Daemonset can be viewed via `kubectl get pods -n kube-system -w`, you can do kbd:[CTRL+c] to end the watch.
+=====
+
+Check if the entries are added to minikube node host file
+
+[#minikube-check-host-entry]
+[source,bash,subs="attributes+,+macros"]
+----
+minikube ssh -- sudo cat /etc/hosts
+----
+copyToClipboard::minikube-check-host-entry[]
+
+A successful daemonset run will show the minikube node `/etc/hosts` file with the following entries:
+
+[source,bash]
+----
+127.0.0.1       localhost
+127.0.1.1 demo
+10.111.151.121  dev.local
+10.111.151.121  example.com
+----
+
+[NOTE]
+======
+The IP for `dev.local` and `example.com` will match the **CLUSTER-IP** of the internal registry. To know the Cluster IP run the command:
+
+[#minikube-check-registry-ip]
+[source,bash,subs="attributes+,+macros"]
+----
+kubectl get svc registry -n kube-system
+----
+copyToClipboard::minikube-check-registry-ip[]
+======
+
+[source,bash,subs="attributes+,+macros"]
+----
+NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
+registry   ClusterIP   10.111.151.121   <none>        80/TCP                  178m
+----
+
+**Update CoreDNS**
+
+[#minikube-update-coredns]
+[source,bash,subs="attributes+,+macros"]
+----
+./patch-coredns.sh
+----
+copyToClipboard::minikube-update-coredns[]
+
+To check successful patch  run the following command 
+
+[#check-coredns-cm]
+[source,bash,subs="attributes+,+macros"]
+----
+kubectl get cm -n kube-system coredns -o yaml
+----
+copyToClipboard::check-coredns-cm[]
+
+A successful patch will have the coredns updated ConfigMap `coredns` in `kube-system`
+
+[source,yaml]
+----
+apiVersion: v1
+data:
+  Corefile: |-
+    .:53 {
+        errors
+        health
+        rewrite name dev.local registry.kube-system.svc.cluster.local
+        rewrite name example.com registry.kube-system.svc.cluster.local
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+           pods insecure
+           upstream
+           fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        proxy . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+kind: ConfigMap
+metadata:
+  name: coredns
+----
 
 **Install Istio**
 
@@ -173,7 +312,7 @@ copyToClipboard::setup-knative-tutorial-ns[]
 
 [TIP]
 =====
-The kubens utility installed as part of https://github.com/ahmetb/kubectx[kubectx] allows for easy switching between Kubernetes namespaces.
+The https://github.com/ahmetb/kubens[kubens] utility installed as part of https://github.com/ahmetb/kubectx[kubectx] allows for easy switching between Kubernetes namespaces.
 
 [#setup-knative-tutorial-kubens]
 [source,bash,subs="+macros,+attributes"]

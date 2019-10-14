@@ -20,7 +20,6 @@ include::partial$prereq-cli.adoc[]
 
 endif::[]
 
-
 [#scaling-deploy-service]
 == Deploy Service
 
@@ -31,8 +30,6 @@ The following snippet shows what a Knative service YAML will look like:
 ----
 include::ROOT:example$02-basics/{service-file}[]
 ----
-
-ifndef::workshop[]
 
 Navigate to the tutorial chapter's `knative` folder:
 
@@ -110,15 +107,6 @@ By default Knative Serving allows 100 concurrent requests into a pod. This is de
 
 For this exercise let us make our service handle only **10** concurrent requests. This will cause Knative autoscaler to scale to more pods as soon as we run more than 10 requests in parallel against the revision.
 
-Navigate to the tutorial chapter's `knative` folder:
-
-[#scaling-navigate-back]
-[source,bash,subs="attributes+,+macros"]
-----
-cd $TUTORIAL_HOME/{scaling-repo}/knative
-----
-copyToClipboard::scaling-navigate-back[]
-
 [#scaling-concurrency-10]
 === Service with concurrency of 10 requests
 .link:{github-repo}/{scaling-repo}/knative/{service-file}[{service-file}]
@@ -181,8 +169,9 @@ endif::[]
 [#scaling-load-service]
 === Load the service
 
-We will now send some load to the greeter service.  The command below sends 50 concurrent requests (`-c 50`) for the next 30s (`-t 30s`)
+We will now send some load to the greeter service.  The command below sends 50 concurrent requests (`-c 50`) for the next 10s (`-z 30s`)
 
+ifndef::workshop[]
 [tabs]
 ====
 Kubernetes::
@@ -191,8 +180,8 @@ Kubernetes::
 [#scaling-run-siege]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-siege -r 1 -c 50 -t 30S \
-  -H "Host:greeter.knativetutorial.example.com" \
+hey -c 50 -z 10s \
+  -H "Host:prime-generator.knativetutorial.example.com" \
   "http://pass:[${IP_ADDRESS}]/?sleep=3&upto=10000&memload=100"
 ----
 copyToClipboard::scaling-run-siege[]
@@ -200,15 +189,18 @@ copyToClipboard::scaling-run-siege[]
 OpenShift::
 +
 --
+endif::[]
 [#oc-scaling-run-siege]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-siege -r 1 -c 50 -t 30S \
+hey -c 50 -z 10s \
   "pass:[${SVC_URL}]/?sleep=3&upto=10000&memload=100"
 ----
 copyToClipboard::oc-scaling-run-siege[]
+ifndef::workshop[]
 --
 ====
+endif::[]
 
 After you've successfully run this small load test, you will notice the number of greeter service pods will have scaled to 5 automatically. 
 
@@ -249,7 +241,7 @@ include::ROOT:example$04-scaling/{service-file}[]
 :url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
-After the deployment was successful we should see a Kubernetes Deployment called `greeter-v2-deployment` with **two** pods available.
+After the deployment was successful we should see a Kubernetes Deployment called `prime-generator-v2-deployment` with **two** pods available.
 
 Open a new terminal and run the following command :
 
@@ -290,7 +282,8 @@ kubectl::
 [#run-scaling-cleanup]
 [source,bash,subs="attributes+,+macros"]
 ----
-kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter
+kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter  &&\
+kubectl -n {tutorial-namespace} delete services.serving.knative.dev prime-generator
 ----
 copyToClipboard::run-scaling-cleanup[]
 --
@@ -301,7 +294,8 @@ endif::[]
 [#run-oc-scaling-cleanup]
 [source,bash,subs="attributes+,+macros"]
 ----
-oc -n {tutorial-namespace} delete services.serving.knative.dev greeter
+oc -n {tutorial-namespace} delete services.serving.knative.dev greeter &&\
+oc -n {tutorial-namespace} delete services.serving.knative.dev prime-generator
 ----
 copyToClipboard::run-oc-scaling-cleanup[]
 ifndef::workshop[]

@@ -6,10 +6,10 @@
 [#knative-tutorial-shell-env]
 [source,bash,subs="attributes+,+macros"]
 ----
-cd knative-tutorial
-export TUTORIAL_HOME=pass:[`pwd`]
-export WORKSHOP_USER='PUT YOUR USER NUMBER HERE'
-export WORKSHOP_OPENSHIFT_SERVER='PUT THE OPENSHIFT SEVER URL HERE'
+# set the current workshop user
+export WORKSHOP_USER=1
+# update the tutorial to point to knative-tutorial
+export TUTORIAL_HOME="/projects/$CHE_WORKSPACE_ID/projects/knative-tutorial"
 ----
 copyToClipboard::knative-tutorial-shell-env[]
 
@@ -18,7 +18,7 @@ copyToClipboard::knative-tutorial-shell-env[]
 [#knative-tutorial-oc-login]
 [source,bash,subs="attributes+,+macros"]
 ----
-oc login --username userpass:[$WORKSHOP_USER] --server pass:[$WORKSHOP_OPENSHIFT_SERVER] --insecure-skip-tls-verify=true
+oc login --insecure-skip-tls-verify=true --username userpass:[$WORKSHOP_USER]  {ocpurl}
 ----
 copyToClipboard::knative-tutorial-oc-login[]
 
