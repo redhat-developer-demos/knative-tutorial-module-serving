@@ -2,20 +2,61 @@
 
 **OpenShift**
 
-Knative Serving and Eventing install needs OpenShift v4.x, you need to have one provisioned using https://try.openshift.com[try.openshift.com]or can use any existing OpenShift4 cluster.
+Knative Serving and Eventing install needs OpenShift4, you need to have one provisioned using https://try.openshift.com[try.openshift.com] or can use any existing OpenShift4 cluster.
+
+For this tutorial we will use  https://github.com/code-ready/crc[CodeReady Containers] a single node all in one OpenShift4 on your laptop. Download the CodeReady Containers and start the OpenShift4 cluster locally. Refer to https://code-ready.github.io/crc/[install guide] for more details.
+
+[NOTE]
+======
+The component resources are optimized to suit the resource constraint of single node all in one OpenShift4 on a laptop. Please refer to official https://docs.openshift.com[OpenShift Documentation] for applying or changing for bigger clusters.
+======
 
 Once you have your cluster, you can download the latest OpenShift client(oc) from https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/[here] and add to your path.
 
-We will be using https://coreos.com/operators/[Kubernetes Operators] to install Knative serving and eventing components on OpenShift. OpenShift is integrated with https://operatorhub.io/[OperatorHub] that allows you to install the components(using Kubernetes operators) from within OpenShift web console.
+[#oc-version-check]
+[source,bash,subs="+macros,+attributes"]
+----
+oc version 
+----
+copyToClipboard::oc-version-check[]
+
+The output should be like
+
+[source,bash]
+----
+oc version
+Client Version: version.Info{Major:"4", Minor:"1+", GitVersion:"v4.1.0+b4261e0", GitCommit:"b4261e07ed", GitTreeState:"clean", BuildDate:"2019-07-06T03:16:01Z", GoVersion:"go1.12.6", Compiler:"gc", Platform:"darwin/amd64"}
+Server Version: version.Info{Major:"1", Minor:"14+", GitVersion:"v1.14.6+73b5d76", GitCommit:"73b5d76", GitTreeState:"clean", BuildDate:"2019-09-23T16:18:51Z", GoVersion:"go1.12.8", Compiler:"gc", Platform:"linux/amd64"}
+----
+
+We will be using https://coreos.com/operators/[Kubernetes Operators] to install Serverless (Knative Serving) and Knative Eventing components on OpenShift. 
 
 [IMPORTANT]
 =====
-* The Knative Eventing components are right now available as community components and is currently not supported by Red Hat.
+* The Knative Serving community component is deprecated on OpenShift and we will be using Red Hat serverless operator.
+* The Knative Eventing components are right now available as `knative-eventing` community operator and is currently not supported by Red Hat.
 =====
 
 **Login as admin**
 
 Login to OpenShift console using the cluster admin credentials.
+
+**Create projects**
+
+[NOTE]
+======
+OpenShift is integrated with https://operatorhub.io/[OperatorHub] that allows you to install the components(using Kubernetes operators) from within OpenShift web console. But for the installation we will be using the command line mode via `oc`
+======
+
+[#create-projects]
+[source,bash,subs="+macros,+attributes"]
+----
+oc adm new-project istio-system && \
+oc adm new-project knative-serving && \
+oc adm new-project knative-eventing && \
+oc adm new-project knativetutorial  
+----
+copyToClipboard::create-projects[]
 
 **Install catalog sources**
 
@@ -27,7 +68,25 @@ oc apply -f "pass:[$TUTORIAL_HOME]/install/redhat-operators-csc.yaml" \
 ----
 copyToClipboard::install-csc[]
 
-It will take few minutes for the operators to be installed and reconciled, you can watch the status using the command:
+It will take few minutes for the operators to be installed and reconciled, check the status using the command:
+
+[#check-csc]
+[source,bash,subs="+macros,+attributes"]
+----
+oc -n openshift-marketplace get csc  
+----
+copyToClipboard::check-csc[]
+
+A successful reconciliation should show an output like:
+
+[source,bash,subs="+macros,+attributes"]
+-----
+NAME                           STATUS      MESSAGE                                       AGE
+community-operators-packages   Succeeded   The object has been successfully reconciled   62s
+redhat-operators-packages      Succeeded   The object has been successfully reconciled   62s
+-----
+
+Open a new terminal and start a watch on the command `oc get csv -n openshift-operators`. For further reference in the setup we will call this terminal as **WATCH_WINDOW**.
 
 [#check-operators-status]
 [source,bash,subs="+macros,+attributes"]
@@ -41,12 +100,156 @@ copyToClipboard::check-operators-status[]
 You can terminate the watch using the command kbd:[Ctrl+c]
 =====
 
-**Install Knative Serving**
+**Install Servicemesh**
+
+Subscribe to Servicemesh via https://operstorhub.io[OperatorHub]
+
+[#subscribe-to-servicemesh]
+[source,bash,subs="+macros,+attributes"]
+----
+oc apply -f "pass:[$TUTORIAL_HOME]/install/servicemesh/subscription.yaml"
+----
+copyToClipboard::subscribe-to-servicemesh[]
+
+NOTE: It will take few minutes for the servicemesh and its dependent components to be installed. Watch the status in the WATCH_WINDOW
+
+A successful servicemesh subscription install should show the output in WATCH_WINDOW like:
+
+[source,bash]
+-----
+NAME                         DISPLAY                          VERSION   REPLACES
+                 PHASE
+jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
+tor.v1.13.1      Succeeded
+kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
+or.v1.6.1        Succeeded
+serverless-operator.v1.0.0   Serverless Operator              1.0.0
+                 Succeeded
+servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
+perator.v1.0.0   Succeeded
+-----
+
+The servicemesh operator needs to be copied to the `istio-system` project before we can create a `ServiceMeshControlPlane` and `ServiceMeshMemberRoll` custom resources, you can watch the status using the command:
+
+[#watch-istio-system-operator-copy]
+[source,bash,subs="+macros,+attributes"]
+----
+watch 'oc get csv -n istio-system'
+----
+copyToClipboard::watch-istio-system-operator-copy[]
+
+NOTE: It will take few seconds for the operator to be copied
+
+Once you see the following status, you can terminate the watch using kbd:[Ctrl+c]:
+
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                         DISPLAY                          VERSION   REPLACES
+                 PHASE
+jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
+tor.v1.13.1      Succeeded
+kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
+or.v1.6.1        Succeeded
+serverless-operator.v1.0.0   Serverless Operator              1.0.0
+                 Succeeded
+servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
+perator.v1.0.0   Succeeded
+----
+
+[#create-scmp]
+[source,bash,subs="+macros,+attributes"]
+----
+oc create -f "pass:[$TUTORIAL_HOME]/install/servicemesh/smcp.yaml" && \
+oc create -f "pass:[$TUTORIAL_HOME]/install/servicemesh/smmr.yaml"
+----
+copyToClipboard::create-scmp[]
+
+It will take few minutes for the servicemesh components to be installed, you can watch the status using the command:
+
+[#watch-istio-system-status]
+[source,bash,subs="+macros,+attributes"]
+----
+oc get pods -n istio-system -w 
+----
+copyToClipboard::watch-istio-system-status[]
+
+A successful servicemesh install should show the following pods:
+
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                                     READY   STATUS    RESTARTS   AGE
+cluster-local-gateway-7795cc7956-2zz8h   1/1     Running   0          112s
+istio-citadel-f88bdd688-7ph28            1/1     Running   0          4m2s
+istio-galley-f8f96c6bf-7ngxv             1/1     Running   0          3m31s
+istio-ingressgateway-65bf84457c-t4szp    1/1     Running   0          112s
+istio-pilot-6479978b4b-gknkn             1/1     Running   0          2m55s
+----
+
+IMPORTANT: These are the minimal set of servicemesh components required for serverless.
+
+**Install Serverless**
+
+Subscribe to Serverless via https://operstorhub.io[OperatorHub]
+
+[#subscribe-to-knative-serving]
+[source,bash,subs="+macros,+attributes"]
+----
+oc apply -f "pass:[$TUTORIAL_HOME]/install/knative-serving/subscription.yaml"
+----
+copyToClipboard::subscribe-to-knative-serving[]
+
+[IMPORTANT]
+======
+Wait for the subscription **PHASE** to be **Installed** before proceeding to next step. You can watch the status in the WATCH_WINDOW.
+======
+
+A successful knative serving subscription install should show the output in WATCH_WINDOW like:
+
+[source,bash]
+-----
+NAME                         DISPLAY                          VERSION   REPLACES
+                 PHASE
+jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
+tor.v1.13.1      Succeeded
+kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
+or.v1.6.1        Succeeded
+serverless-operator.v1.0.0   Serverless Operator              1.0.0
+                 Succeeded
+servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
+perator.v1.0.0   Succeeded
+-----
+
+The serverless operator needs to be copied to the `knative-serving` project before we can create a `KnativeServing` custom resource, you can watch the status using the command:
+
+[#watch-knative-serving-operator-copy]
+[source,bash,subs="+macros,+attributes"]
+----
+watch 'oc get csv -n knative-serving'
+----
+copyToClipboard::watch-knative-serving-operator-copy[]
+
+NOTE: It will take few seconds for the operator to be copied
+
+Once you see the following status, you can terminate the watch using kbd:[Ctrl+c]:
+
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                         DISPLAY                          VERSION   REPLACES
+                 PHASE
+jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
+tor.v1.13.1      Succeeded
+kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
+or.v1.6.1        Succeeded
+serverless-operator.v1.0.0   Serverless Operator              1.0.0
+                 Succeeded
+servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
+perator.v1.0.0   Succeeded
+----
 
 [#install-knative-serving]
 [source,bash,subs="+macros,+attributes"]
 ----
-oc apply -f "pass:[$TUTORIAL_HOME]/install/knative-serving/subscription.yaml"
+oc apply -f "pass:[$TUTORIAL_HOME]/install/knative-serving/cr.yaml"
 ----
 copyToClipboard::install-knative-serving[]
 
@@ -60,6 +263,19 @@ oc get pods -n knative-serving -w
 copyToClipboard::check-knative-serving[]
 
 NOTE: You can terminate the watch using the command kbd:[Ctrl+c]
+
+A successful serverless install will show the following pods in `knative-serving` namespace:
+
+[source,bash]
+----
+NAME                                    READY   STATUS    RESTARTS   AGE
+activator-78464cc84-tl7gf               1/1     Running   4          8m53s
+autoscaler-57479674d6-xcwpf             1/1     Running   0          8m52s
+controller-6fcb5b4b78-9n2bj             1/1     Running   0          8m47s
+networking-certmanager-8c6d68d4-bccqx   1/1     Running   0          8m47s
+networking-istio-644984496f-tgcdx       1/1     Running   0          8m47s
+webhook-84b96fdc6f-kr586                1/1     Running   0          8m46s
+----
 
 **Install Knative Eventing**
 
