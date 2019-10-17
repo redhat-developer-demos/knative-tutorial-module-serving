@@ -4,13 +4,6 @@
 
 Knative Serving and Eventing install needs OpenShift4, you need to have one provisioned using https://try.openshift.com[try.openshift.com] or can use any existing OpenShift4 cluster.
 
-For this tutorial we will use  https://github.com/code-ready/crc[CodeReady Containers] a single node all in one OpenShift4 on your laptop. Download the CodeReady Containers and start the OpenShift4 cluster locally. Refer to https://code-ready.github.io/crc/[install guide] for more details.
-
-[NOTE]
-======
-The component resources are optimized to suit the resource constraint of single node all in one OpenShift4 on a laptop. Please refer to official https://docs.openshift.com[OpenShift Documentation] for applying or changing for bigger clusters.
-======
-
 Once you have your cluster, you can download the latest OpenShift client(oc) from https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/[here] and add to your path.
 
 [#oc-version-check]
@@ -20,7 +13,7 @@ oc version
 ----
 copyToClipboard::oc-version-check[]
 
-The output should be like
+The output should show oc version >=4.1
 
 [source,bash]
 ----
@@ -91,7 +84,7 @@ Open a new terminal and start a watch on the command `oc get csv -n openshift-op
 [#check-operators-status]
 [source,bash,subs="+macros,+attributes"]
 ----
-watch 'oc get csv -n openshift-operators'
+watch 'oc get csv -n openshift-operators -ocustom-columns-file=$TUTORIAL_HOME/install/csv-columns.txt'
 ----
 copyToClipboard::check-operators-status[]
 
@@ -117,16 +110,11 @@ A successful servicemesh subscription install should show the output in WATCH_WI
 
 [source,bash]
 -----
-NAME                         DISPLAY                          VERSION   REPLACES
-                 PHASE
-jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
-tor.v1.13.1      Succeeded
-kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
-or.v1.6.1        Succeeded
-serverless-operator.v1.0.0   Serverless Operator              1.0.0
-                 Succeeded
-servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
-perator.v1.0.0   Succeeded
+NAME                                         VERSION               PHASE
+elasticsearch-operator.4.1.20-201910102034   4.1.20-201910102034   Succeeded
+jaeger-operator.v1.13.1                      1.13.1                Succeeded
+kiali-operator.v1.0.6                        1.0.6                 Succeeded
+servicemeshoperator.v1.0.1                   1.0.1                 Succeeded
 -----
 
 The servicemesh operator needs to be copied to the `istio-system` project before we can create a `ServiceMeshControlPlane` and `ServiceMeshMemberRoll` custom resources, you can watch the status using the command:
@@ -134,7 +122,7 @@ The servicemesh operator needs to be copied to the `istio-system` project before
 [#watch-istio-system-operator-copy]
 [source,bash,subs="+macros,+attributes"]
 ----
-watch 'oc get csv -n istio-system'
+watch 'oc get csv -n istio-system -ocustom-columns-file=$TUTORIAL_HOME/install/csv-columns.txt'
 ----
 copyToClipboard::watch-istio-system-operator-copy[]
 
@@ -144,16 +132,11 @@ Once you see the following status, you can terminate the watch using kbd:[Ctrl+c
 
 [source,bash,subs="+macros,+attributes"]
 ----
-NAME                         DISPLAY                          VERSION   REPLACES
-                 PHASE
-jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
-tor.v1.13.1      Succeeded
-kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
-or.v1.6.1        Succeeded
-serverless-operator.v1.0.0   Serverless Operator              1.0.0
-                 Succeeded
-servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
-perator.v1.0.0   Succeeded
+NAME                                         VERSION               PHASE
+elasticsearch-operator.4.1.20-201910102034   4.1.20-201910102034   Succeeded
+jaeger-operator.v1.13.1                      1.13.1                Succeeded
+kiali-operator.v1.0.6                        1.0.6                 Succeeded
+servicemeshoperator.v1.0.1                   1.0.1                 Succeeded
 ----
 
 [#create-scmp]
@@ -178,11 +161,11 @@ A successful servicemesh install should show the following pods:
 [source,bash,subs="+macros,+attributes"]
 ----
 NAME                                     READY   STATUS    RESTARTS   AGE
-cluster-local-gateway-7795cc7956-2zz8h   1/1     Running   0          112s
-istio-citadel-f88bdd688-7ph28            1/1     Running   0          4m2s
-istio-galley-f8f96c6bf-7ngxv             1/1     Running   0          3m31s
-istio-ingressgateway-65bf84457c-t4szp    1/1     Running   0          112s
-istio-pilot-6479978b4b-gknkn             1/1     Running   0          2m55s
+cluster-local-gateway-7795cc7956-mqmq7   1/1     Running   0          92s
+istio-citadel-f88bdd688-c52z8            1/1     Running   0          2m58s
+istio-galley-f8f96c6bf-x7f4k             1/1     Running   0          2m48s
+istio-ingressgateway-65bf84457c-7rh5t    1/1     Running   0          92s
+istio-pilot-7f57f8bb5b-cr2qr             1/1     Running   0          110s
 ----
 
 IMPORTANT: These are the minimal set of servicemesh components required for serverless.
@@ -207,16 +190,12 @@ A successful knative serving subscription install should show the output in WATC
 
 [source,bash]
 -----
-NAME                         DISPLAY                          VERSION   REPLACES
-                 PHASE
-jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
-tor.v1.13.1      Succeeded
-kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
-or.v1.6.1        Succeeded
-serverless-operator.v1.0.0   Serverless Operator              1.0.0
-                 Succeeded
-servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
-perator.v1.0.0   Succeeded
+NAME                                         VERSION               PHASE
+elasticsearch-operator.4.1.20-201910102034   4.1.20-201910102034   Succeeded
+jaeger-operator.v1.13.1                      1.13.1                Succeeded
+kiali-operator.v1.0.6                        1.0.6                 Succeeded
+serverless-operator.v1.0.0                   1.0.0                 Succeeded
+servicemeshoperator.v1.0.1                   1.0.1                 Succeeded
 -----
 
 The serverless operator needs to be copied to the `knative-serving` project before we can create a `KnativeServing` custom resource, you can watch the status using the command:
@@ -224,7 +203,7 @@ The serverless operator needs to be copied to the `knative-serving` project befo
 [#watch-knative-serving-operator-copy]
 [source,bash,subs="+macros,+attributes"]
 ----
-watch 'oc get csv -n knative-serving'
+watch 'oc get csv -n knative-serving -ocustom-columns-file=$TUTORIAL_HOME/install/csv-columns.txt'
 ----
 copyToClipboard::watch-knative-serving-operator-copy[]
 
@@ -234,16 +213,12 @@ Once you see the following status, you can terminate the watch using kbd:[Ctrl+c
 
 [source,bash,subs="+macros,+attributes"]
 ----
-NAME                         DISPLAY                          VERSION   REPLACES
-                 PHASE
-jaeger-operator.v1.14.0      Community Jaeger Operator        1.14.0    jaeger-opera
-tor.v1.13.1      Succeeded
-kiali-operator.v1.7.0        Kiali Operator                   1.7.0     kiali-operat
-or.v1.6.1        Succeeded
-serverless-operator.v1.0.0   Serverless Operator              1.0.0
-                 Succeeded
-servicemeshoperator.v1.0.1   Red Hat OpenShift Service Mesh   1.0.1     servicemesho
-perator.v1.0.0   Succeeded
+NAME                                         VERSION               PHASE
+elasticsearch-operator.4.1.20-201910102034   4.1.20-201910102034   Succeeded
+jaeger-operator.v1.13.1                      1.13.1                Succeeded
+kiali-operator.v1.0.6                        1.0.6                 Succeeded
+serverless-operator.v1.0.0                   1.0.0                 Succeeded
+servicemeshoperator.v1.0.1                   1.0.1                 Succeeded
 ----
 
 [#install-knative-serving]
@@ -269,12 +244,12 @@ A successful serverless install will show the following pods in `knative-serving
 [source,bash]
 ----
 NAME                                    READY   STATUS    RESTARTS   AGE
-activator-78464cc84-tl7gf               1/1     Running   4          8m53s
-autoscaler-57479674d6-xcwpf             1/1     Running   0          8m52s
-controller-6fcb5b4b78-9n2bj             1/1     Running   0          8m47s
-networking-certmanager-8c6d68d4-bccqx   1/1     Running   0          8m47s
-networking-istio-644984496f-tgcdx       1/1     Running   0          8m47s
-webhook-84b96fdc6f-kr586                1/1     Running   0          8m46s
+activator-78464cc84-vq9wp               1/1     Running   1          103s
+autoscaler-57479674d6-hlvx7             1/1     Running   0          102s
+controller-6fcb5b4b78-flq8d             1/1     Running   0          97s
+networking-certmanager-8c6d68d4-cmf7x   1/1     Running   0          97s
+networking-istio-644984496f-db58w       1/1     Running   0          96s
+webhook-84b96fdc6f-vbpxm                1/1     Running   1          96s
 ----
 
 **Install Knative Eventing**
@@ -286,6 +261,48 @@ oc apply -f "pass:[$TUTORIAL_HOME]/install/knative-eventing/subscription.yaml"
 ----
 copyToClipboard::install-knative-eventing[]
 
+[IMPORTANT]
+======
+Wait for the subscription **PHASE** to be **Installed** before proceeding to next step. You can watch the status in the WATCH_WINDOW.
+======
+
+A successful knative eventing subscription install should show the output in WATCH_WINDOW like:
+
+[source,bash]
+-----
+NAME                                         VERSION               PHASE
+elasticsearch-operator.4.1.20-201910102034   4.1.20-201910102034   Succeeded
+jaeger-operator.v1.13.1                      1.13.1                Succeeded
+kiali-operator.v1.0.6                        1.0.6                 Succeeded
+knative-eventing-operator.v0.8.0             0.8.0                 Succeeded
+serverless-operator.v1.0.0                   1.0.0                 Succeeded
+servicemeshoperator.v1.0.1                   1.0.1                 Succeeded
+-----
+
+The knative-eventing operator needs to be copied to the `knative-eventing` project before we can create a `KnativeEventing` custom resource, you can watch the status using the command:
+
+[#watch-knative-eventing-operator-copy]
+[source,bash,subs="+macros,+attributes"]
+----
+watch 'oc get csv -n knative-eventing -ocustom-columns-file=$TUTORIAL_HOME/install/csv-columns.txt'
+----
+copyToClipboard::watch-knative-eventing-operator-copy[]
+
+NOTE: It will take few seconds for the operator to be copied
+
+Once you see the following status, you can terminate the watch using kbd:[Ctrl+c]:
+
+[source,bash,subs="+macros,+attributes"]
+----
+NAME                                         VERSION               PHASE
+elasticsearch-operator.4.1.20-201910102034   4.1.20-201910102034   Succeeded
+jaeger-operator.v1.13.1                      1.13.1                Succeeded
+kiali-operator.v1.0.6                        1.0.6                 Succeeded
+knative-eventing-operator.v0.8.0             0.8.0                 Succeeded
+serverless-operator.v1.0.0                   1.0.0                 Succeeded
+servicemeshoperator.v1.0.1                   1.0.1                 Succeeded
+----
+
 It will take few minutes for the Knative eventing components to be installed, you can watch the status using:
 
 [#check-knative-eventing]
@@ -296,3 +313,28 @@ oc get pods -n knative-eventing -w
 copyToClipboard::check-knative-eventing[]
 
 NOTE: You can terminate the watch using the command kbd:[Ctrl+c]
+
+A successful Knative Eventing install will show the following pods in Knative eventing namespace:
+
+[source,bash]
+-----
+NAME                                            READY   STATUS    RESTARTS   AGE
+eventing-controller-758d785bf7-jr7bh            1/1     Running   0          2m4s
+eventing-webhook-7ff46cd45f-w8d9v               1/1     Running   0          2m3s
+imc-controller-75d7f598df-4knn4                 1/1     Running   0          113s
+imc-dispatcher-77f565585c-z6d8x                 1/1     Running   0          113s
+in-memory-channel-controller-6b4967d97b-x2hcj   1/1     Running   0          2m
+in-memory-channel-dispatcher-8bbcd4f9-kxmcw     1/1     Running   0          118s
+sources-controller-788874d5fc-8jqrz             1/1     Running   0          2m4s
+-----
+
+Congratulations! You have now installed all the required components to run the tutorial exercises. You can terminate the WATCH_WINDOW using kbd:[Ctrl+c].
+
+**Navigate to tutorial project**
+
+[#nav-to-tutorial-project]
+[source,bash,subs="+macros,+attributes"]
+----
+oc project knativetutorial
+----
+copyToClipboard::nav-to-tutorial-project[]
