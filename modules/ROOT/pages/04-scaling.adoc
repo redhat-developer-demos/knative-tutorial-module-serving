@@ -115,6 +115,16 @@ For this exercise let us make our service handle only **10** concurrent requests
 include::ROOT:example$04-scaling/{service-file}[]
 ----
 
+Navigate to the tutorial chapter's `knative` folder:
+
+[#scaling-navigate-to-scaling]
+[source,bash,subs="attributes+,+macros"]
+----
+cd $TUTORIAL_HOME/{scaling-repo}/knative
+----
+copyToClipboard::scaling-navigate-to-scaling[]
+
+
 The Knative service definition above will allow each service pod to handle max of 10 in-flight requests per pod (configured via `autoscaling.knative.dev/target` annotation) before automatically scaling to new pod(s)
 
 ifdef::workshop[]
@@ -181,7 +191,7 @@ Kubernetes::
 [source,bash,subs="attributes+,+macros",linenums]
 ----
 hey -c 50 -z 10s \
-  -H "Host:prime-generator.knativetutorial.example.com" \
+  -host "prime-generator.knativetutorial.example.com" \
   "http://pass:[${IP_ADDRESS}]/?sleep=3&upto=10000&memload=100"
 ----
 copyToClipboard::scaling-run-siege[]
@@ -282,7 +292,7 @@ kubectl::
 [#run-scaling-cleanup]
 [source,bash,subs="attributes+,+macros"]
 ----
-kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter  &&\
+kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter
 kubectl -n {tutorial-namespace} delete services.serving.knative.dev prime-generator
 ----
 copyToClipboard::run-scaling-cleanup[]
@@ -294,7 +304,7 @@ endif::[]
 [#run-oc-scaling-cleanup]
 [source,bash,subs="attributes+,+macros"]
 ----
-oc -n {tutorial-namespace} delete services.serving.knative.dev greeter &&\
+oc -n {tutorial-namespace} delete services.serving.knative.dev greeter
 oc -n {tutorial-namespace} delete services.serving.knative.dev prime-generator
 ----
 copyToClipboard::run-oc-scaling-cleanup[]
