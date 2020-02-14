@@ -80,6 +80,20 @@ endif::[]
 * The actual deployment name may vary in your setup
 ====
 
+ifdef::workshop[]
+[IMPORTANT]
+====
+Before you invoke the service, you need to wait for the service ingress to be ready. You can watch the status of the ingress using:
+
+[#ingress-status]
+[source,bash,linenums,subs="+macros,+attributes"]
+----
+watch oc get ksvc -n {tutorial-namespace}
+----
+copyToClipboard::ingress-status[]
+====
+endif::[]
+
 [#basics-invoke-service]
 == Invoke Service
 ifndef::workshop[]

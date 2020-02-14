@@ -193,6 +193,7 @@ endif::[]
 [#oc-scaling-run-siege]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
+export SVC_URL=`oc get rt prime-generator -o yaml | yq read - 'status.url'`
 hey -c 50 -z 10s \
   "pass:[${SVC_URL}]/?sleep=3&upto=10000&memload=100"
 ----

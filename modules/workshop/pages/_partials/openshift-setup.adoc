@@ -9,16 +9,16 @@
 # set the current workshop user
 export WORKSHOP_USER=1
 # update the tutorial to point to knative-tutorial
-export TUTORIAL_HOME="/projects/$CHE_WORKSPACE_ID/projects/knative-tutorial"
+export TUTORIAL_HOME="/projects/knative-tutorial"
 ----
 copyToClipboard::knative-tutorial-shell-env[]
 
-=== Login into OpenShift 
+=== Login into OpenShift
 
 [#knative-tutorial-oc-login]
 [source,bash,subs="attributes+,+macros"]
 ----
-oc login --insecure-skip-tls-verify=true --username userpass:[$WORKSHOP_USER]  {ocpurl}
+oc login --insecure-skip-tls-verify=true --username userpass:[$WORKSHOP_USER]  {ocpurl}:6443
 ----
 copyToClipboard::knative-tutorial-oc-login[]
 
