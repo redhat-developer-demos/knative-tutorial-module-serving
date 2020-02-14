@@ -99,7 +99,7 @@ Run the following command to create the Knative service that will be used as the
 .link:{github-repo}/{eventing-repo}/knative/service.yaml[service.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-include::ROOT:example$05-eventing/service.yaml[]
+include::ROOT:example$eventing/service.yaml[]
 ----
 
 [#eventing-deploy-sink-service]

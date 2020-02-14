@@ -11,7 +11,7 @@ The https://en.wikipedia.org/wiki/Event-driven_architecture#Event_channel[channe
 
 [#eventing-create-event-channel]
 === Create Event Channel
-.link:{github-repo}/{eventing-repo}/knative/channel.yaml[channel.yaml]
+.link:{github-repo}/{eventing-repo}/channel.yaml[channel.yaml]
 [source,yaml,linenums]
 ----
 apiVersion: eventing.knative.dev/v1alpha1
@@ -33,7 +33,7 @@ include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
 Run the following commands to create the channel:
 
 :doc-sec: eventing-run-source-sub
-:url: {github-repo}/{eventing-repo}/knative/channel.yaml
+:url: {github-repo}/{eventing-repo}/channel.yaml
 :url-alt-text: channel.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
@@ -83,7 +83,7 @@ The event source listens to external events e.g. a kafka topic or for a file on 
 
 [#eventing-create-event-source]
 === Create Event Source
-.link:{github-repo}/{eventing-repo}/knative/event-source.yaml[event-source.yaml]
+.link:{github-repo}/{eventing-repo}/event-source.yaml[event-source.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
 apiVersion: sources.eventing.knative.dev/v1alpha1
@@ -113,7 +113,7 @@ When you xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs], you
 Run the following commands to create the event source resources:
 
 :doc-sec: eventing-run-apply-event-src
-:url: {github-repo}/{eventing-repo}/knative/event-source.yaml
+:url: {github-repo}/{eventing-repo}/event-source.yaml
 :url-alt-text: event-source.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
@@ -164,16 +164,16 @@ The event subscription is responsible of connecting the channel(sink) with the s
 
 [#eventing-create-subscriber]
 === Create Channel Subscriber
-.link:{github-repo}/{eventing-repo}/knative/channel-subscriber.yaml[channel-subscriber.yaml]
+.link:{github-repo}/{eventing-repo}/channel-subscriber.yaml[channel-subscriber.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-include::ROOT:example$05-eventing/channel-subscriber.yaml[]
+include::ROOT:example$eventing/channel-subscriber.yaml[]
 ----
 
 Run the following commands to create the channel subscriber:
 
 :doc-sec: create-subscriber
-:url: {github-repo}/{eventing-repo}/knative/channel-subscriber.yaml
+:url: {github-repo}/{eventing-repo}/channel-subscriber.yaml
 :url-alt-text: channel-subscriber.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
@@ -237,10 +237,10 @@ TIP: Add `-oyaml` to the above commands to get more details about each object th
 
 Run the following command to create the Knative service that will be used as the subscriber for the cron events:
 
-.link:{github-repo}/{eventing-repo}/knative/service.yaml[service.yaml]
+.link:{github-repo}/{eventing-repo}/service.yaml[service.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-include::ROOT:example$05-eventing/service.yaml[]
+include::ROOT:example$eventing/service.yaml[]
 ----
 
 [#eventing-deploy-subscriber-service]
@@ -249,7 +249,7 @@ include::ROOT:example$05-eventing/service.yaml[]
 Run the following commands to create the service:
 
 :doc-sec: deploy-sub-svc
-:url: {github-repo}/{eventing-repo}/knative/service.yaml
+:url: {github-repo}/{eventing-repo}/service.yaml
 :url-alt-text: service.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 

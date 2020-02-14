@@ -6,7 +6,7 @@ Navigate to the tutorial chapter's `knative` folder:
 [#eventing-navigate-to-folder]
 [source,bash,subs="attributes+,+macros"]
 ----
-cd $TUTORIAL_HOME/{eventing-repo}/knative
+cd $TUTORIAL_HOME/{eventing-repo}
 ----
 copyToClipboard::eventing-navigate-to-folder[]
 

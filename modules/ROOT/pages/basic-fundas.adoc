@@ -26,16 +26,16 @@ Navigate to the tutorial chapter's `knative` folder:
 [#basics-nav-folder]
 [source,bash,subs="+macros,+attributes"]
 ----
-cd $TUTORIAL_HOME/{basics-repo}/knative
+cd $TUTORIAL_HOME/{basics-repo}
 ----
 copyToClipboard::basics-nav-folder[]
 
 The following snippet shows what a Knative service YAML looks like:
 
-.link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
+.link:{github-repo}/{basics-repo}/{service-file}[{service-file}]
 [source,yaml,subs="+macros,attributes+"]
 ----
-include::ROOT:example$02-basics/{service-file}[]
+include::ROOT:example${basics-repo}/{service-file}[]
 ----
 
 The service can be deployed using the following command:
@@ -155,7 +155,17 @@ include::partial$knative-objects.adoc[tag=knative-revisions]
 [#deploying-new-revision]
 == Deploy a New Revision of a Service
 
-As Knative follows https://12factor.net[12-Factor] application principles, any https://12factor.net/config[configuration] change will trigger creation of a new revision of the deployment.
+.Twelve-factor app
+****
+https://12factor.net/[12factor.net] defines the twelve-factor app as a methodology for building software-as-a-service apps that:
+
+- Use declarative formats for setup automation, to minimize time and cost for new developers joining the project;
+- Have a clean contract with the underlying operating system, offering maximum portability between execution environments;
+- Are suitable for deployment on modern cloud platforms, obviating the need for servers and systems administration;
+- Minimize divergence between development and production, enabling continuous deployment for maximum agility;
+- And can scale up without significant changes to tooling, architecture, or development practices.
+- The twelve-factor methodology can be applied to apps written in any programming language, and which use any combination of backing services (database, queue, memory cache, etc).
+****
  
 To deploy a new revision of the greeter service, we will add an environment variable to the existing service as shown below:
 
@@ -164,10 +174,10 @@ To deploy a new revision of the greeter service, we will add an environment vari
 
 :service-file: service-env.yaml
 
-.link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
+.link:{github-repo}/{basics-repo}/{service-file}[{service-file}]
 [source,yaml,subs="+macros,attributes+"]
 ----
-include::ROOT:example$02-basics/{service-file}[]
+include::ROOT:example$basics/{service-file}[]
 ----
 
 Adding an environment variable that will be used as the message prefix
@@ -190,121 +200,6 @@ Now if you list revisions, you will see two of them, named similar to `greeter-v
 include::partial$knative-objects.adoc[tag=knative-revisions]
 
 <<basics-invoke-service,Invoking Service>> will now show an output like **Namaste  greeter => '6fee83923a9f' : 1**, where __Namaste__ is the value we configured via environment variable in the Knative service resource file.
-
-:service-file: service-pinned.yaml
-
-[#basics-pinning-revision]
-== Pinning Service to a Revision
-
-As you noticed, Knative service always routes traffic to the **latest** revision of the service deployment. It is possible to split the traffic amongst the available revisions. 
-
-As we already know the at got two revisions namely `greeter-v1` and `greeter-v2`. The `traffic` block in the Knative `service` specification helps in pinning a service to a particular revision or split traffic among multiple revisions.
-
-[TIP]
-====
-You can use the <<rev1-basics-show-knative-revisions, show Knative service revisions>> command to find the available revisions for the greeter service.
-====
-
-=== Service pinned to first revision
-
-.link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
-[source,yaml,linenums,subs="attributes+,+macros"]
-----
-include::ROOT:example$02-basics/{service-file}[]
-----
-
-The above service definition creates three sub-routes(named after traffic **tags**) to existing `greeter` route.
-
-- **current** - The revision is going to have all 100% traffic distribution
-- **prev** - The previously active revision, which will now have zero traffic 
-- **latest** - The route pointing to any latest service deployment, by setting to zero we are making sure the latest revision is not picked up automatically.
-
-Let us redeploy the greeter service by pinning it to the `greeter-v1`:
-
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
-[#run-pinned-revision]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl -n {tutorial-namespace} apply -f {service-file}
-----
-copyToClipboard::run-pinned-revision[]
---
-oc::
-+
---
-endif::[]
-[#run-oc-pinned-revision]
-[source,bash,subs="+macros,+attributes"]
-----
-oc -n {tutorial-namespace}  apply -f {service-file}
-----
-copyToClipboard::run-oc-pinned-revision[]
-ifndef::workshop[]
---
-====
-endif::[]
-
-Let us list the available sub-routes:
-
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
-[#run-traffic-sub-routes]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl -n {tutorial-namespace} get ksvc greeter -oyaml \
- | yq r - 'status.traffic[*].url'
-----
-copyToClipboard::run-traffic-sub-routes[]
---
-oc::
-+
---
-endif::[]
-[#run-oc-traffic-sub-routes]
-[source,bash,subs="+macros,+attributes"]
-----
-oc -n {tutorial-namespace} get ksvc greeter -oyaml \
-  | yq r - 'status.traffic[*].url'
-----
-copyToClipboard::run-oc-traffic-sub-routes[]
-ifndef::workshop[]
---
-====
-endif::[]
-
-The above command should return you three sub-routes for the main `greeter` route:
-
-[source,bash,subs="+macros,attributes"]
-----
-- http://current-greeter.knativetutorial.example.com #<1>
-- http://prev-greeter.knativetutorial.example.com #<2>
-- http://latest-greeter.knativetutorial.example.com #<3>
-----
-
-<1> the sub route for the traffic tag `current`
-<2> the sub route for the traffic tag `prev`
-<3> the sub route for the traffic tag `latest`
-
-<<basics-invoke-service,Invoking Service>> will produce output similar to **Hi  greeter => '6fee83923a9f' : 1**
-
-As per the current traffic distribution, the `greeter` route will always return response from revision `greeter-v1` (traffic tag `current`)
-
-[TIP]
-====
-ifndef::workshop[]
-* If you are in vanilla Kubernetes cluster you can also try the using the above urls in the `Host` header of the http command to see them scaling the respective deployments to get the result.
-endif::[]
-* If you are on OpenShift then you can directly invoke the urls to see the response of those respective revision
-====
 
 [#basics-cleanup]
 == Cleanup

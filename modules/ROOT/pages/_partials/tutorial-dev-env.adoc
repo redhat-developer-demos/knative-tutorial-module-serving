@@ -8,60 +8,6 @@ You have two options to choose your development environment,
 * <<dev-env-all-in-one,all in one>>
 
 [#tutorial-all-local]
-=== CLI tools
-
-The following CLI tools are required for running the exercises in this tutorial. Please have them installed and configured before you get started with any of the tutorial chapters.
-
-[cols="4*^,4*.",options="header"]
-|===
-|**Tool**|**macOS**|**Fedora**|**windows**
-
-| Git
-| https://git-scm.com/download/mac[Download]
-| https://git-scm.com/download/win[Download]
-| https://git-scm.com/download/linux[Download]
-
-| `Docker`
-| https://docs.docker.com/docker-for-mac/install[Docker for Mac]
-| `dnf install docker`
-| https://docs.docker.com/docker-for-windows/install[Docker for Windows]
-
-| `kubectl`
-| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Download]
-| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Download]
-| https://kubernetes.io/docs/tasks/tools/install-kubectl/[Download]
-
-| https://github.com/wercker/stern[stern]
-| `brew install stern`
-| https://github.com/wercker/stern/releases/download/1.6.0/stern_linux_amd64[Download]
-| https://github.com/wercker/stern/releases/download/1.11.0/stern_windows_amd64.exe[Download]
-
-| https://github.com/mikefarah/yq[yq]
-| `brew install yq`
-| https://github.com/mikefarah/yq/releases/latest[Download]
-| https://github.com/mikefarah/yq/releases/download/2.4.0/yq_windows_amd64.exe[Download]
-
-| https://httpie.org/[httpie]
-| `brew install httpie`
-| `dnf install httpie`
-| https://httpie.org/doc#windows-etc
-
-| https://github.com/rakyll/hey[hey]
-| https://storage.googleapis.com/hey-release/hey_darwin_amd64[Download]
-| https://storage.googleapis.com/jblabs/dist/hey_linux_v0.1.2[Download]
-| https://storage.googleapis.com/jblabs/dist/hey_win_v0.1.2.exe[Download]
-
-| watch
-| `brew install watch`
-| `dnf install procps-ng`
-|
-
-| kubectx and kubens
-| `brew install kubectx`
-| https://github.com/ahmetb/kubectx
-|
-
-|===
 
 [#dev-env-all-in-one]
 == All in one Environment

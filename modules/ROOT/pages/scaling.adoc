@@ -1,6 +1,9 @@
 = Scaling
 include::_attributes.adoc[]
 
+:service-file: service.yaml
+:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+
 At the end of this chapter you will be able to:
 
 * Understand what scale-to-zero is and why it's important.
@@ -10,8 +13,6 @@ At the end of this chapter you will be able to:
 * Enable concurrency based autoscaling.
 * Configure a minimum number of replicas for a service.
 
-:service-file: service.yaml
-:greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
 
 ifndef::workshop[]
 [#scaling-prerequisite]
@@ -25,10 +26,10 @@ endif::[]
 
 The following snippet shows what a Knative service YAML will look like:
 
-.link:{github-repo}/{basics-repo}/knative/{service-file}[{service-file}]
+.link:{github-repo}/{basics-repo}/{service-file}[{service-file}]
 [source,yaml,subs="+macros,attributes+"]
 ----
-include::ROOT:example$02-basics/{service-file}[]
+include::ROOT:example$basics/{service-file}[]
 ----
 
 Navigate to the tutorial chapter's `knative` folder:
@@ -36,14 +37,14 @@ Navigate to the tutorial chapter's `knative` folder:
 [#scaling-navigate-to-basics]
 [source,bash,subs="attributes+,+macros"]
 ----
-cd $TUTORIAL_HOME/{basics-repo}/knative
+cd $TUTORIAL_HOME/{basics-repo}
 ----
 copyToClipboard::scaling-navigate-to-basics[]
 
 The service can be deployed using the command:
 
 :doc-sec: crtd-rev1-apply
-:url: {github-repo}/{basics-repo}/knative/{service-file}
+:url: {github-repo}/{basics-repo}/{service-file}
 :url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
@@ -109,10 +110,10 @@ For this exercise let us make our service handle only **10** concurrent requests
 
 [#scaling-concurrency-10]
 === Service with concurrency of 10 requests
-.link:{github-repo}/{scaling-repo}/knative/{service-file}[{service-file}]
+.link:{github-repo}/{scaling-repo}/{service-file}[{service-file}]
 [source,yaml,subs="+macros,attributes+"]
 ----
-include::ROOT:example$04-scaling/{service-file}[]
+include::ROOT:example$scaling/{service-file}[]
 ----
 
 The Knative service definition above will allow each service pod to handle max of 10 in-flight requests per pod (configured via `autoscaling.knative.dev/target` annotation) before automatically scaling to new pod(s)
@@ -123,7 +124,7 @@ Navigate to the tutorial chapter's `knative` folder:
 [#scaling-navigate-back]
 [source,bash,subs="attributes+,+macros"]
 ----
-cd $TUTORIAL_HOME/{scaling-repo}/knative
+cd $TUTORIAL_HOME/{scaling-repo}
 ----
 copyToClipboard::scaling-navigate-back[]
 endif::[]
@@ -132,7 +133,7 @@ endif::[]
 === Deploy service 
 
 :doc-sec: scaling-run-autoscale-10
-:url: {github-repo}/{scaling-repo}/knative/{service-file}
+:url: {github-repo}/{scaling-repo}/{service-file}
 :url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
@@ -227,17 +228,17 @@ The following example shows how to make Knative create services that start with 
 
 [#scaling-deploy-service-minscale]
 === Deploy service 
-.link:{github-repo}/{scaling-repo}/knative/{service-file}[{service-file}]
+.link:{github-repo}/{scaling-repo}/{service-file}[{service-file}]
 [source,yaml,subs="+macros,attributes+"]
 ----
-include::ROOT:example$04-scaling/{service-file}[]
+include::ROOT:example$scaling/{service-file}[]
 ----
 
 - The deployment of this service will always have a minimum of 2 pods.
 - Will allow each service pod to handle max of 10 in-flight requests per pod before automatically scaling to new pods.
 
 :doc-sec: scaling-run-min-scale
-:url: {github-repo}/{scaling-repo}/knative/{service-file}
+:url: {github-repo}/{scaling-repo}/{service-file}
 :url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 

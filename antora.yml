@@ -1,6 +1,6 @@
 name: knative-tutorial-basics
 title: Introduction to Knative
-version: 0.7.x
+version: master
 nav:
   - modules/ROOT/nav.adoc
 

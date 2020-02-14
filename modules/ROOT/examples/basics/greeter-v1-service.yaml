@@ -5,13 +5,13 @@ metadata:
 spec:
   template:
     metadata:
-      name: greeter-v1
-      annotations:
-        # disable istio-proxy injection
-        sidecar.istio.io/inject: "false"
+      name: greeter-v2
     spec:
       containers:
       - image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+        env:
+        - name: MESSAGE_PREFIX
+          value: Namaste
         livenessProbe:
           httpGet:
             path: /healthz

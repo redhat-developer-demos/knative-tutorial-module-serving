@@ -14,13 +14,13 @@ At the end of this chapter you will be able to :
 [WARNING]
 ====
 * Knative Client (`kn`) is still under aggressive development, so commands and options might change rapidly. 
-* As of writing the tutorial v0.2.0 was the latest version of the Knative Client
+* As of writing the tutorial v0.12.0 was the latest version of the Knative Client
 ====
 
 [#kn-install]
 == Install
 
-Download the https://github.com/knative/client/releases/tag/v0.2.0[latest] Knative Client and add to your `PATH`.
+Download the https://github.com/knative/client/releases/tag/v0.12.0[latest] Knative Client and add to your `PATH`.
 
 Verify installation by running the command:
 
@@ -35,17 +35,21 @@ The above command will return a response like
 
 [source,bash]
 ----
-Version:      v0.2.0
-Build Date:   2019-07-10 20:57:03
-Git Revision: e1614f9
-Dependencies:
-- serving:    v0.6.0
+Version:      v0.12.0
+Build Date:   2020-01-29 21:03:45
+Git Revision: 164cb5f
+Supported APIs:
+* Serving
+  - serving.knative.dev/v1alpha1 (knative-serving v0.12.0)
+* Eventing
+  - sources.eventing.knative.dev/v1alpha1 (knative-eventing v0.12.0)
+  - eventing.knative.dev/v1alpha1 (knative-eventing v0.12.0)
 ----
 
 [#kn-ksvc]
 == Knative Service Commands
 
-In the  xref:02-basic-fundas.adoc[previous chapter] you created, updated and deleted the Knative service using the YAML and kubectl/oc command line tools.
+In the  xref:basic-fundas.adoc[previous chapter] you created, updated and deleted the Knative service using the YAML and kubectl/oc command line tools.
 
 We will perform the same operations in this chapter but with `kn`: 
 
@@ -108,7 +112,7 @@ include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
 ====
 endif::[]
 
-You can xref:02-basic-fundas.adoc#basics-see-what-you-have-deployed[verify] what you the kn client has deployed, to make sure its inline with what you have see in previous chapter.
+You can xref:basic-fundas.adoc#basics-see-what-you-have-deployed[verify] what you the kn client has deployed, to make sure its inline with what you have see in previous chapter.
 
 [#kn-update-ksvc]
 === Update Knative Service
@@ -142,7 +146,7 @@ The describe should show you an exhaustive YAML like
 
 [source,yaml]
 ----
-include::ROOT:example$03-knative-client/kn_ksvc_desc.yaml[]
+include::ROOT:example$kn/kn_ksvc_desc.yaml[]
 ----
 
 [#kn-delete-ksvc]
@@ -213,7 +217,7 @@ The command should return a YAML like
 
 [source,yaml]
 ----
-include::ROOT:example$03-knative-client/kn_rev_desc.yaml[]
+include::ROOT:example$kn/kn_rev_desc.yaml[]
 ----
 
 [#kn-revisions-delete]
@@ -262,7 +266,7 @@ greeter   http://greeter.knativetutorial.example.com   10m   3 OK / 3     100% -
 
 [TIP]
 ====
-As an exercise you can run the exercises of xref:02-basic-fundas.adoc[previous chapter] and try listing the routes using `kn`.
+As an exercise you can run the exercises of xref:basic-fundas.adoc[previous chapter] and try listing the routes using `kn`.
 ====
 
 [#kn-cleanup]

@@ -8,20 +8,26 @@ Download https://kubernetes.io/docs/setup/minikube[minikube] and add it to your 
 [#setup-minikube-start]
 [source,bash,subs="+macros,+attributes"]
 ----
-minikube profile {tutorial-namespace} #<1>
-
-minikube start -p {tutorial-namespace} --memory=8192 --cpus=6 \#<1> 
-  --kubernetes-version=v1.14.0 \
-  --vm-driver=hyperkit \#<2>  
-  --disk-size=50g \
-  --extra-config='apiserver.enable-admission-plugins=LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook' \
-  --insecure-registry='10.0.0.0/24' #<3>
+$TUTORIAL_HOME/bin/start-minikube.sh
 ----
 copyToClipboard::setup-minikube-start[]
 
-<1> Setting Minikube profile to **knative** so that all future Minikube commands are executed with this profile context
-<2> On macOS/windows. On Linux, please use `--vm-driver=kvm2`
-<3> Make the internal registry to be insecure registry
+.Minikube starting
+[source,bash,subs="+macros,+attributes"]
+----
+❌  profile "{tutorial-namespace}" not found
+✅  Created a new profile : {tutorial-namespace}
+✅  minikube profile was successfully set to {tutorial-namespace}
+😄  [{tutorial-namespace}] minikube v1.6.2 on Darwin 10.15.2
+✨  Selecting 'virtualbox' driver from user configuration (alternates: [hyperkit])
+🔥  Creating virtualbox VM (CPUs=4, Memory=8192MB, Disk=50000MB) ...
+🐳  Preparing Kubernetes v1.14.0 on Docker '19.03.5' ...
+    ▪ apiserver.enable-admission-plugins=LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook
+🚜  Pulling images ...
+🚀  Launching Kubernetes ...
+⌛  Waiting for cluster to come online ...
+🏄  Done! kubectl is now configured to use "{tutorial-namespace}"
+----
 
 [#minikube-enable-registry]
 **Enable Internal Registry**
@@ -83,7 +89,7 @@ Check if the entries are added to minikube node host file
 [#minikube-check-host-entry]
 [source,bash,subs="attributes+,+macros"]
 ----
-minikube ssh -- sudo cat /etc/hosts
+watch minikube ssh -- sudo cat /etc/hosts
 ----
 copyToClipboard::minikube-check-host-entry[]
 
@@ -162,146 +168,174 @@ metadata:
   name: coredns
 ----
 
-**Install Istio**
-
-[#run-install-istio]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl apply --filename https://raw.githubusercontent.com/knative/serving/{knative-serving-version}/third_party/istio-1.1.7/istio-crds.yaml && \
-kubectl apply --filename https://raw.githubusercontent.com/knative/serving/{knative-serving-version}/third_party/istio-1.1.7/istio-lean.yaml
-----
-copyToClipboard::run-install-istio[]
-
-[NOTE,subs="+macros,+attributes"]
-=====
-* As Knative need only Istio Ingress Gateway and Pilot, we will use Knative Istio lean install, which just installs the required component
-* Installation of Istio components will take some time and it is highly recommended that you start Knative components installation only after you have verified that all Istio component pods are running. The Istio pods can be watched using the command:
-
-[#setup-watch-istio-pods]
-[source,bash,subs="+macros,+attributes"]
-----
-kubectl -n istio-system get pods -w 
-----
-copyToClipboard::setup-watch-istio-pods[]
-
-You can use kbd:[CTRL + c ] to terminate the watch
-=====
-
-A successful Istio install will have the pods running in the `istio-system` namespace as shown below:
-
-[source,bash]
-----
-NAME                                     READY   STATUS      RESTARTS   AGE
-cluster-local-gateway-579cfd9fdd-9hb7p   0/1     Running     0          62s
-istio-ingressgateway-776c54f7c4-m9qz2    1/2     Running     0          62s
-istio-init-crd-10-mc7h5                  0/1     Completed   0          68s
-istio-init-crd-11-86lsf                  0/1     Completed   0          68s
-istio-pilot-75b876b994-w8x7t             0/1     Running     0          62s
-istio-pilot-75b876b994-w8x7t             1/1     Running     0          67s
-istio-ingressgateway-776c54f7c4-m9qz2    2/2     Running     0          69s
-----
-
 **Install Custom Resource Definitions**
 
 [#run-knative-crd-install]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl apply --selector knative.dev/crd-install=true \
-  --filename {knative-serving-repo}/{knative-serving-version}/serving.yaml \
-  --filename {knative-eventing-repo}/{knative-eventing-version}/release.yaml
+  --filename {knative-serving-repo}/{knative-serving-version}/serving-crds.yaml \
+  --filename {knative-eventing-repo}/{knative-eventing-version}/eventing.yaml
 ----
 copyToClipboard::run-knative-crd-install[]
 
-[NOTE]
-=====
-First time when you run the above command will show some warnings and error as shown below, you can either safely ignore them or re-running the above command will cause the errors to disappear.
+Now that you have installed the Knative Serving and Eventing CRDs, the following sections we will verify the CRDs by querying the `api-resources`.
 
-[source,bash]
+All *Knative Serving* resources will be under the API group called `serving.knative.dev`.
+
+.serving.knative.dev
+[source,bash,subs="+quotes,+attributes,+macros"]
 ----
-unable to recognize "https://github.com/knative/serving/releases/download/v0.7.1/serving.yaml": no matches for kind "Image" in version "caching.internal.knative.dev/v1alpha1"
-unable to recognize "https://github.com/knative/eventing/releases/download/v0.7.1/release.yaml": no matches for kind "ClusterChannelProvisioner" in version "eventing.knative.dev/v1alpha1"
+$ **kubectl api-resources --api-group='serving.knative.dev'**
+NAME             SHORTNAMES      APIGROUP              NAMESPACED   KIND
+configurations   config,cfg      serving.knative.dev   true         Configuration
+revisions        rev             serving.knative.dev   true         Revision
+routes           rt              serving.knative.dev   true         Route
+services         kservice,ksvc   serving.knative.dev   true         Service
 ----
-=====
+
+All *Knative Eventing* resources will be under the one of following API groups:
+
+ - messaging.knative.dev
+ - eventing.knative.dev
+ - sources.eventing.knative.dev
+ - sources.knative.dev
+
+.messaging.knative.dev
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+$ **kubectl api-resources --api-group='messaging.knative.dev'**
+NAME               SHORTNAMES   APIGROUP                NAMESPACED   KIND
+channels           ch           messaging.knative.dev   true         Channel
+inmemorychannels   imc          messaging.knative.dev   true         InMemoryChannel
+parallels                       messaging.knative.dev   true         Parallel
+sequences                       messaging.knative.dev   true         Sequence
+subscriptions      sub          messaging.knative.dev   true         Subscription
+----
+
+.eventing.knative.dev
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+$ **kubectl api-resources --api-group='eventing.knative.dev'**
+NAME         SHORTNAMES   APIGROUP               NAMESPACED   KIND
+brokers                   eventing.knative.dev   true         Broker
+eventtypes                eventing.knative.dev   true         EventType
+triggers                  eventing.knative.dev   true         Trigger
+----
+
+.sources.eventing.knative.dev
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+$ **kubectl api-resources --api-group='sources.eventing.knative.dev'**
+NAME               SHORTNAMES   APIGROUP                       NAMESPACED   KIND
+apiserversources                sources.eventing.knative.dev   true         ApiServerSource
+containersources                sources.eventing.knative.dev   true         ContainerSource
+cronjobsources                  sources.eventing.knative.dev   true         CronJobSource
+sinkbindings                    sources.eventing.knative.dev   true         SinkBinding
+----
+
+.sources.knative.dev
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+$ **kubectl api-resources --api-group='sources.knative.dev'**
+NAME               SHORTNAMES   APIGROUP              NAMESPACED   KIND
+apiserversources                sources.knative.dev   true         ApiServerSource
+sinkbindings                    sources.knative.dev   true         SinkBinding
+----
+
+The Knative has two main infrastructure components: https://kubernetes.io/docs/concepts/architecture/controller/[controller] and https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/[webhook] helps in translating the Knative CRDs which are usually written YAML files, into Kubernetes objects like Deployment and Service. Apart from the controller and webhook, the Knative Serving and Eventing also install their respective functional components which are listed in the upcoming sections.
 
 **Install Knative Serving**
 
 [#run-install-knative-serving]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply --selector networking.knative.dev/certificate-provider!=cert-manager \
-  --filename {knative-serving-repo}/{knative-serving-version}/serving.yaml
+kubectl apply \
+  --filename \
+  {knative-serving-repo}/{knative-serving-version}/serving-core.yaml
 ----
 copyToClipboard::run-install-knative-serving[]
 
-[NOTE]
-=====
-As the Knative serving components are getting installed, you can watch their status using the following command:
+This process will take few minutes for the Knative Serving pods to be up and running, you can monitor the status of the Knative Serving installation by watching the pods in the `knative-serving` namespace, using the command:
 
-[#setup-watch-knative-serving-pods]
+.Knative Serving pods
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+$ **watch kubectl get pods -n knative-serving**
+NAME                               READY   STATUS    RESTARTS   AGE
+activator-5dd6dc95bc-k9lg9         1/1     Running   0          86s
+autoscaler-b56799cdf-55h5k         1/1     Running   0          86s
+autoscaler-hpa-6f5c5cf986-b8lvg    1/1     Running   0          86s
+controller-f8b98d964-qjxff         1/1     Running   0          85s
+networking-istio-bb44d8c87-s2lbg   1/1     Running   0          85s
+webhook-78dcbf4d94-dczd6           1/1     Running   0          85s
+----
+
+*Install Kourier*
+
+[#run-install-kourier]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl -n knative-serving get pods -w 
+kubectl apply \
+  --filename \
+    https://raw.githubusercontent.com/knative/serving/{knative-serving-version}/third_party/kourier-latest/kourier.yaml
 ----
-copyToClipboard::setup-watch-knative-serving-pods[]
+copyToClipboard::run-install-kourier[]
 
-You can use kbd:[CTRL + c ] to terminate the watch
-=====
-
-A successful Knative serving installation will have its pods running in the `knative-serving` namespace as shown below:
-
-[source,bash]
+.Kourier pods
+[source,bash,subs="+quotes,+attributes,+macros"]
 ----
-NAME                                READY   STATUS    RESTARTS   AGE
-activator-bc968b649-r6l82           1/1     Running   0          36s
-autoscaler-66f5cd8774-kjs9k         1/1     Running   0          36s
-controller-68977d579c-phltz         1/1     Running   0          36s
-networking-istio-5d8d9d574d-5lfsl   1/1     Running   0          36s
-webhook-894c8cb4d-7hl97             1/1     Running   0          36s
+$ **watch kubectl get pods -n kourier-system**
+NAME                                      READY   STATUS    RESTARTS   AGE
+3scale-kourier-control-77459dcc76-56pkc   1/1     Running   0          55s
+3scale-kourier-gateway-8645d88bf6-gvbf7   1/1     Running   0          56s
 ----
+
+
+Now configure Knative serving to use Kourier as the ingress:
+
+[#run-config-kn-kourier]
+[source,bash,subs="+macros,+attributes"]
+----
+kubectl patch configmap/config-network \
+  -n knative-serving \
+  --type merge \
+  -p '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
+----
+copyToClipboard::run-config-kn-kourier[]
 
 **Install Knative Eventing** 
 
 [#run-install-knative-eventing]
 [source,bash,subs="+macros,+attributes"]
 ----
-kubectl apply --selector networking.knative.dev/certificate-provider!=cert-manager \
-  --filename {knative-eventing-repo}/{knative-eventing-version}/release.yaml
+kubectl apply \
+  --selector \
+  networking.knative.dev/certificate-provider!=cert-manager \
+  --filename \
+  {knative-eventing-repo}/{knative-eventing-version}/eventing.yaml
 ----
 copyToClipboard::run-install-knative-eventing[]
 
-[NOTE,subs="+macros,+attributes"]
-=====
-As the Knative eventing components are getting installed, you can watch their status using the following commands:
+Like Knative Serving deployment, Knative Eventing deployment will also take few minutes to complete. You can watch `knative-eventing` namespace pods for live status, using the command:
 
-[#setup-watch-knative-eventing-pods]
-[source,bash,subs="+macros,+attributes"]
+.Knative eventing pods
+[source,bash,subs="+quotes,+attributes,+macros"]
 ----
-kubectl -n knative-eventing get pods -w 
-----
-copyToClipboard::setup-watch-knative-eventing-pods[]
-
-You can use kbd:[CTRL + c ] to terminate the watch
-=====
-
-A successful Knative eventing installation will have the following pods running in the `knative-eventing` namespace:
-
-.knative-eventing namespace
-
-[source,bash]
-----
-NAME                                           READY   STATUS    RESTARTS   AGE
-eventing-controller-5c5f664ddb-9bmq9           1/1     Running   0          3m40s
-eventing-webhook-7ccb674dc6-qjtwp              1/1     Running   0          3m40s
-imc-controller-9bcf67784-j7m2h                 1/1     Running   0          3m40s
-imc-dispatcher-7c6c7d798c-kvzf7                1/1     Running   0          3m40s
-in-memory-channel-controller-8dfd9c8df-cpsph   1/1     Running   0          3m40s
-in-memory-channel-dispatcher-8776cb68f-wntmb   1/1     Running   0          3m39s
-sources-controller-6f4d494fb9-8wkj4            1/1     Running   0          3m40s
+$ **watch kubectl get pods -n knative-eventing**
+NAME                                            READY   STATUS    RESTARTS   AGE
+eventing-controller-77b4f76d56-d4fzf            1/1     Running   0          2m39s
+eventing-webhook-f5d57b487-hbgps                1/1     Running   0          2m39s
+imc-controller-65bb5ddf-kld5l                   1/1     Running   0          2m39s
+imc-dispatcher-dd84879d7-qt2qn                  1/1     Running   0          2m39s
+in-memory-channel-controller-6f74d5c8c8-vm44b   1/1     Running   0          2m39s
+in-memory-channel-dispatcher-8db675949-mqmfk    1/1     Running   0          2m39s
+sources-controller-79c4bf8b86-lxbjf             1/1     Running   0          2m39s
 ----
 
 **Configuring Kubernetes namespace**
 
-We will use a non default Kubernetes namespace called `{tutorial-namespace}` for all the tutorial exercises.
+All the tutorial exercises will be deployed in namespace called `{tutorial-namespace}`:
 
 [#setup-knative-tutorial-ns]
 [source,bash,subs="+macros,+attributes"]
@@ -322,3 +356,4 @@ kubens {tutorial-namespace}
 copyToClipboard::setup-knative-tutorial-kubens[]
 
 =====
+
