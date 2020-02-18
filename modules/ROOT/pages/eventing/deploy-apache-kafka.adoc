@@ -32,7 +32,7 @@ copyToClipboard::eventing-deploy-kafka[]
 oc::
 +
 --
-endif::[]
+endif::[]\
 [#oc-eventing-deploy-kafka]
 [source,bash,subs="+quotes,attributes+,+macros"]
 ----
