@@ -50,7 +50,6 @@ watch kubectl get pods
 -----
 copyToClipboard::watch-ns-for-broker-pods[]
 
-
 Running command above should show the following pods in {tutorial-namespace}:
 
 [source,bash]
@@ -59,9 +58,11 @@ NAME                                         READY STATUS      AGE
 default-broker-filter-c6654bccf-qb272        1/1   Running     18s
 default-broker-ingress-7479966dc7-99xvm      1/1   Running     18s
 -----
+--
 oc::
 +
 --
+endif::[]
 [#oc-watch-ns-for-broker]
 [source,bash,subs="+quotes,attributes+,+macros"]
 ----
@@ -619,11 +620,11 @@ kubectl::
 [#eventing-run-trigger-broker-cleanup]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-kubectl -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
-kubectl -n {tutorial-namespace} delete \
- containersource.sources.eventing.knative.dev heartbeat-event-source
-kubectl -n {tutorial-namespace} delete triggers.eventing.knative.dev event-greeter-trigger
-kubectl -n {tutorial-namespace} delete brokers.eventing.knative.dev default
+kubectl -n {tutorial-namespace} delete -f eventing-aloha-sink.yaml
+kubectl -n {tutorial-namespace} delete -f eventing-bonjour-sink.yaml
+kubectl -n {tutorial-namespace} delete -f trigger-helloaloha.yaml
+kubectl -n {tutorial-namespace} delete -f trigger-hellobonjour.yaml
+kubectl -n {tutorial-namespace} delete -f curler.yaml
 ----
 copyToClipboard::eventing-run-trigger-broker-cleanup[]
 
@@ -635,11 +636,11 @@ endif::[]
 [#eventing-run-oc-trigger-broker-cleanup]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-oc -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
-oc -n {tutorial-namespace} delete \
- containersource.sources.eventing.knative.dev heartbeat-event-source
-oc -n {tutorial-namespace} delete triggers.eventing.knative.dev event-greeter-trigger
-oc -n {tutorial-namespace} delete brokers.eventing.knative.dev default
+oc -n {tutorial-namespace} delete -f eventing-aloha-sink.yaml
+oc -n {tutorial-namespace} delete -f eventing-bonjour-sink.yaml
+oc -n {tutorial-namespace} delete -f trigger-helloaloha.yaml
+oc -n {tutorial-namespace} delete -f trigger-hellobonjour.yaml
+oc -n {tutorial-namespace} delete -f curler.yaml
 ----
 copyToClipboard::eventing-run-oc-trigger-broker-cleanup[]
 ifndef::workshop[]
