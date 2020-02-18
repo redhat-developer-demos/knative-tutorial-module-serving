@@ -32,6 +32,7 @@ copyToClipboard::eventing-deploy-kafka[]
 oc::
 +
 --
+endif::[]
 [#oc-eventing-deploy-kafka]
 [source,bash,subs="+quotes,attributes+,+macros"]
 ----
@@ -43,7 +44,6 @@ https://github.com/strimzi/strimzi-kafka-operator\
   | oc apply -n kafka -f - 
 ----
 copyToClipboard::oc-eventing-deploy-kafka[]
---
 ifndef::workshop[]
 --
 endif::[]
@@ -67,13 +67,13 @@ copyToClipboard::eventing-watch-kafka-pods[]
 oc::
 +
 --
+endif::[]
 [#oc-eventing-watch-kafka-pods]
 [source,bash,subs="+quotes,attributes+,+macros"]
 ----
 watch oc get pods -n kafka
 ----
 copyToClipboard::oc-eventing-watch-kafka-pods[]
---
 ifndef::workshop[]
 --
 endif::[]
@@ -105,13 +105,13 @@ copyToClipboard::eventing-watch-kafka-res[]
 oc::
 +
 --
+endif::[]
 [#oc-eventing-watch-kafka-res]
 [source,bash,subs="+quotes,attributes+,+macros"]
 ----
 oc api-resources --api-group='kafka.strimzi.io'
 ----
 copyToClipboard::oc-eventing-watch-kafka-res[]
---
 ifndef::workshop[]
 --
 endif::[]
@@ -157,6 +157,7 @@ copyToClipboard::watch-kafka-cluster[]
 oc::
 +
 --
+endif::[]
 [#oc-create-kafka-cluster]
 [source,bash,subs="+quotes,attributes+,+macros"]
 ----
@@ -172,7 +173,6 @@ Watch the Kafka cluster deployment:
 oc kubectl get pods -n kafka
 ----
 copyToClipboard::oc-watch-kafka-cluster[]
---
 ifndef::workshop[]
 --
 endif::[]
@@ -239,11 +239,12 @@ Verify the created topic:
 kubectl -n kafka  get kafkatopics
 ----
 copyToClipboard::verify-create-kakfa-topic[]
-
 --
 oc::
 +
 --
+endif::[]
+
 [#oc-create-kakfa-topic]
 [source,bash,subs="+quotes,attributes+,+macros"]
 ----
@@ -259,7 +260,6 @@ Verify the created topic:
 kubectl -n kafka  get kafkatopics
 ----
 copyToClipboard::oc-verify-create-kakfa-topic[]
---
 ifndef::workshop[]
 --
 endif::[]

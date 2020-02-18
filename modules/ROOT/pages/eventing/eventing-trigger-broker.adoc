@@ -59,8 +59,6 @@ NAME                                         READY STATUS      AGE
 default-broker-filter-c6654bccf-qb272        1/1   Running     18s
 default-broker-ingress-7479966dc7-99xvm      1/1   Running     18s
 -----
-
---
 oc::
 +
 --
@@ -175,7 +173,7 @@ spec:
 
 Run the following commands to create the trigger:
 
-:doc-sec: eventing-trigger-helloaloha.yaml
+:doc-sec: eventing-trigger-helloaloha
 :url: {github-repo}/{eventing-repo}/trigger-helloaloha.yaml
 :url-alt-text: trigger-helloaloha.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
@@ -190,7 +188,7 @@ include::ROOT:example$eventing/trigger-hellobonjour.yaml[]
 
 Run the following commands to create the trigger:
 
-:doc-sec: eventing-trigger-hellobonjour.yaml
+:doc-sec: eventing-trigger-hellobonjour
 :url: {github-repo}/{eventing-repo}/trigger-hellobonjour.yaml
 :url-alt-text: trigger-hellobonjour.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
@@ -216,10 +214,6 @@ include::partial$knative-objects.adoc[tag=knative-container-event-sources]
 
 ==== services
 include::partial$knative-objects.adoc[tag=knative-event-services]
-
-==== triggers
-include::partial$knative-objects.adoc[tag=knative-triggers]
-
 
 [#eventing-trigger-verification]
 == Verification
@@ -269,10 +263,11 @@ The command should show the output as:
 http://default-broker.{tutorial-namespace}.svc.cluster.local
 
 --
-endif::[]
 oc::
 +
 --
+endif::[]
+
 Pull out the subscriberURI for `eventhingaloha`:
 
 [#oc-eventing-triggers-verify-sub1]
@@ -309,6 +304,7 @@ copyToClipboard::oc-eventing-triggers-verify-sub3[]
 
 The command should show the output as: 
 http://default-broker.{tutorial-namespace}.svc.cluster.local
+
 ifndef::workshop[]
 --
 ====
