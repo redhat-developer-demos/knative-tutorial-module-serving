@@ -95,8 +95,6 @@ NAME                                         READY STATUS      AGE
 default-broker-filter-c6654bccf-qb272        1/1   Running     18s
 default-broker-ingress-7479966dc7-99xvm      1/1   Running     18s
 -----
---
-endif::[]
 [#eventing-trigger-broker-oc-label-namespace]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
