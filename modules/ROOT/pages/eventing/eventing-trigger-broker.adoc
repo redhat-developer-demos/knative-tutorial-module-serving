@@ -1,23 +1,24 @@
-= Triggers and Brokers
+[[brokers-and-triggers]]
+== Triggers and Brokers
 include::_attributes.adoc[]
 
 :greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
 
-[#events-triggers-brokers]
-== Events, Triggers and Brokers
-
-With Knative 0.5.0, Broker and Trigger objects are introduced to make event filtering easier.
-
-Brokers provide selection of events by attributes. They receive events and forwards them to subscribers defined by matching Triggers.
-
-Triggers provide a way of filtering of events by attributes. They are attached to subscribers and make the subscribers receive the events only they are interested in.
-
-include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
+Use the Knative Eventing `Broker` and `Trigger` Custom Resources to allow for CloudEvent attribute filtering.
 
 [#broker]
 == Broker
 
-First of all, we need to create a Broker. Knative eventing provides a Broker named `default` when a special label is added to a namespace.
+By labeling *{tutorial-namespace}* namespace with `knative-eventing-injection=enabled` as shown below, will make Knative Eventing to deploy a default Knative Eventing Broker and its related Ingress :
+
+[#label-namespace-for-default-broker]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+kubectl label namespace {tutorial-namespace} knative-eventing-injection=enabled
+----
+copyToClipboard::label-namespace-for-default-broker[]
+
+Verify that the default broker is running:
 
 ifndef::workshop[]
 [tabs]
@@ -25,16 +26,76 @@ ifndef::workshop[]
 kubectl::
 +
 --
-[#eventing-trigger-broker-label-namespace]
-[source,bash,subs="attributes+,+macros",linenums]
+[#watch-ns-for-broker]
+[source,bash,subs="+quotes,attributes+,+macros"]
 ----
-kubectl label namespace {tutorial-namespace} knative-eventing-injection=enabled
+watch kubectl --namespace {tutorial-namespace} get broker
 ----
-copyToClipboard::eventing-trigger-broker-label-namespace[]
+copyToClipboard::watch-ns-for-broker[]
+
+Running command above should show an output like:
+
+[source,bash]
+-----
+NAME     READY REASON URL                                                 AGE
+default  True         http://default-broker.{tutorial-namespace}.svc.cluster.local   22s
+-----
+
+This will also start two additional pods namely `default-broker-filter` and `default-broker-ingress` :
+
+[#watch-ns-for-broker-pods]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch kubectl get pods
+-----
+copyToClipboard::watch-ns-for-broker-pods[]
+
+
+Running command above should show the following pods in {tutorial-namespace}:
+
+[source,bash]
+-----
+NAME                                         READY STATUS      AGE
+default-broker-filter-c6654bccf-qb272        1/1   Running     18s
+default-broker-ingress-7479966dc7-99xvm      1/1   Running     18s
+-----
 
 --
 oc::
 +
+--
+[#oc-watch-ns-for-broker]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+watch oc --namespace {tutorial-namespace} get broker
+----
+copyToClipboard::oc-watch-ns-for-broker[]
+
+Running command above should show an output like:
+
+[source,bash]
+-----
+NAME     READY REASON URL                                                 AGE
+default  True         http://default-broker.{tutorial-namespace}.svc.cluster.local   22s
+-----
+
+This will also start two additional pods namely `default-broker-filter` and `default-broker-ingress` :
+
+[#oc-watch-ns-for-broker-pods]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch oc get pods
+-----
+copyToClipboard::oc-watch-ns-for-broker-pods[]
+
+Running command above should show the following pods in {tutorial-namespace}:
+
+[source,bash]
+-----
+NAME                                         READY STATUS      AGE
+default-broker-filter-c6654bccf-qb272        1/1   Running     18s
+default-broker-ingress-7479966dc7-99xvm      1/1   Running     18s
+-----
 --
 endif::[]
 [#eventing-trigger-broker-oc-label-namespace]
@@ -48,193 +109,104 @@ ifndef::workshop[]
 ====
 endif::[]
 
-This will create the `default` broker. Execute the following command to see it:
-
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
-[#eventing-trigger-broker-see-broker]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-kubectl -n {tutorial-namespace} get brokers.eventing.knative.dev
-----
-copyToClipboard::eventing-trigger-broker-see-broker[]
-
---
-oc::
-+
---
-endif::[]
-[#eventing-trigger-broker-oc-see-broker]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-oc --namespace {tutorial-namespace} get brokers.eventing.knative.dev
-----
-copyToClipboard::eventing-trigger-broker-oc-see-broker[]
-ifndef::workshop[]
---
-====
-endif::[]
-
-Output should be similar to below:
-
-[source,bash,subs="attributes+,+macros"]
-----
-NAME      READY     REASON    HOSTNAME                                           AGE
-default   True                default-broker.knativetutorial.svc.cluster.local   2m
-----
-
-Labeling the namespace will also create some pods that are related to the `default` broker.
-
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
-[#eventing-trigger-broker-see-broker-pods]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-kubectl -n {tutorial-namespace} get pods
-----
-copyToClipboard::eventing-trigger-broker-see-broker-pods[]
-
---
-oc::
-+
---
-endif::[]
-[#eventing-trigger-broker-oc-see-broker-pods]
-[source,bash,subs="attributes+,+macros",linenums]
-----
-oc --namespace {tutorial-namespace} get pods
-----
-copyToClipboard::eventing-trigger-broker-oc-see-broker-pods[]
-ifndef::workshop[]
---
-====
-endif::[]
-
-Running  the above command should return the following result:
-
-[source,bash,subs="attributes+,+macros"]
-----
-NAME                                      READY     STATUS    RESTARTS   AGE
-default-broker-filter-5bb94d8ddf-r9j4v    2/2       Running   1          2m43s
-default-broker-ingress-59b9b4985c-8n6d4   2/2       Running   1          2m43s
-----
-
-
 [#eventing-service]
 == Service 
 
-[#eventing-gen-service]
-=== Generate Service
+Now, that you have the broker configured, you need to create the sinks `eventingaloha` and `eventingbonjour`, which will receive the filtered events.
 
-Run the following command to create the Knative service that will be used as the subscriber for the events that are going to be published later:
-
-.link:{github-repo}/{eventing-repo}/knative/service.yaml[service.yaml]
+.link:{github-repo}/{eventing-repo}/eventing-aloha-sink.yaml[eventing-aloha-sink.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-include::ROOT:example$eventing/service.yaml[]
+include::ROOT:example$eventing/eventing-aloha-sink.yaml[]
 ----
+
+.link:{github-repo}/{eventing-repo}/eventing-bonjour-sink.yaml[eventing-bonjour-sink.yaml]
+[source,yaml,subs="attributes+,+macros"]
+----
+include::ROOT:example$eventing/eventing-bonjour-sink.yaml[]
+----
+
+[NOTE]
+====
+The image being used by both of these services is identical.  However, the difference in name `aloha` vs `bonjour` will make obvious which one is receiving a particular event.
+====
 
 [#eventing-deploy-service]
 === Deploy Service
 
-Run the following commands to create the service:
+Run the following commands to deploy the `eventingaloha` and `eventingbonjour` services:
 
-:doc-sec: deploy-service
-:url: {github-repo}/{eventing-repo}/knative/service.yaml
-:url-alt-text: service.yaml
+:doc-sec: deploy-service-eventing-aloha
+:url: {github-repo}/{eventing-repo}/eventing-aloha-sink.yaml
+:url-alt-text: eventing-aloha-sink.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
-
-[#eventing-event-source]
-== Event Source
-.link:{github-repo}/{eventing-repo}/knative/event-source-broker.yaml[event-source-broker.yaml]
-[source,yaml,linenums,subs="attributes+,+macros"]
-----
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: ContainerSource #<1>
-metadata:
-  name: heartbeat-event-source
-spec:
-  image: quay.io/openshift-knative/knative-eventing-sources-heartbeats:v0.5.0 #<2>
-  args: #<3>
-    - '--label="Thanks for doing Knative Tutorial"'
-    - '--period=1'
-  env:
-    - name: POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: POD_NAMESPACE
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
-  sink: #<4>
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Broker
-    name: default
-----
-
-<1> The type of event source. `ContainerSource` type is basically a container sending events.
-<2> The image to run with this `ContainerSource`. Source of the image is available link:https://github.com/knative/eventing-sources/blob/v0.5.0/cmd/heartbeats/main.go[here].
-<3> Arguments for the `ContainerSource` image. `label` in this particular case is what the image will be sending as event data and `period` is how often it will send events.
-<4> Sink here is the `default` broker created earlier. So, the `default` broker will receive the events sent by this event source.
-
-Run the following commands to create the event source resources:
-
-:doc-sec: eventing-trigger-broker-create-event-source
-:url: {github-repo}/{eventing-repo}/knative/event-source-broker.yaml
-:url-alt-text: event-source-broker.yaml
+:doc-sec: deploy-service-eventing-bonjour
+:url: {github-repo}/{eventing-repo}/eventing-bonjour-sink.yaml
+:url-alt-text: eventing-bonjour-sink.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
+
+Wait approximately 60 seconds for `eventingaloha` and `eventingbonjour` to terminate, scale-down to zero before proceeding.
 
 [#eventing-trigger]
 == Trigger
-.link:{github-repo}/{eventing-repo}/knative/trigger.yaml[trigger.yaml]
-[source,yaml,linenums,subs="attributes+,+macros"]
+
+Now create the the trigger for `eventingaloha` that will associate the filtered events to a service:
+
+.link:{github-repo}/{eventing-repo}/trigger-helloaloha.yaml[trigger-helloaloha.yaml]
+[source,yaml]
 ----
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
-  name: event-greeter-trigger
+  name: helloaloha
 spec:
   filter:
-    sourceAndType:
-      type: dev.knative.eventing.samples.heartbeat #<1>
-  subscriber: #<2>
+    attributes:
+      type: greeting # <1>
+  subscriber:
     ref:
-      apiVersion: serving.knative.dev/v1alpha1
-      kind: Service #<3>
-      name: event-greeter #<4>
+     apiVersion: serving.knative.dev/v1alpha1
+     kind: Service
+     name: eventingaloha
 ----
 
-<1> The event type to filter on. The event type `dev.knative.eventing.samples.heartbeat` is the one used by the `ContainerSource` image we deployed earlier. 
-<2> Definition of the subscriber for the events that are matched by the filter of the trigger.
-<3> In this case, the subscriber is a service.
-<4> Subscriber service name. This trigger will make sure the events filtered will be sent to this service.
+<1> The `type` is the CloudEvent type that is mapped to the `ce-type` HTTP header.  A Trigger can filter by CloudEvent attributes such as type, source or extension.
 
-Run the following commands to create the event source resources:
+Run the following commands to create the trigger:
 
-:doc-sec: eventing-trigger-broker-create-trigger
-:url: {github-repo}/{eventing-repo}/knative/trigger.yaml
-:url-alt-text: trigger.yaml
+:doc-sec: eventing-trigger-helloaloha.yaml
+:url: {github-repo}/{eventing-repo}/trigger-helloaloha.yaml
+:url-alt-text: trigger-helloaloha.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
-[#eventing-verification]
-== Verification
+Now create the the trigger for `eventingbonjour` that will associate the filtered events to a service:
 
-=== Logs
+.link:{github-repo}/{eventing-repo}/trigger-hellobonjour.yaml[trigger-hellobonjour.yaml]
+[source,yaml,linenums,subs="attributes+,+macros"]
+----
+include::ROOT:example$eventing/trigger-hellobonjour.yaml[]
+----
 
-[NOTE]
-====
-When you xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs], you will notice this data being delivered to the service.
-====
+Run the following commands to create the trigger:
+
+:doc-sec: eventing-trigger-hellobonjour.yaml
+:url: {github-repo}/{eventing-repo}/trigger-hellobonjour.yaml
+:url-alt-text: trigger-hellobonjour.yaml
+include::ROOT:partial$deploy-knative-resources.adoc[]
+
+Verify that your triggers are ready:
+
+include::partial$knative-objects.adoc[tag=knative-triggers]
+
+The command should show the following output:
+
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+NAME         READY BROKER  SUBSCRIBER_URI                                      AGE
+helloaloha   True  default http://eventingaloha.{tutorial-namespace}.svc.cluster.local   24s
+hellobonjour True  default http://eventingbonjour.{tutorial-namespace}.svc.cluster.local 48s
+----
 
 [#eventing-see-what-you-have-deployed]
 === See what you have deployed
@@ -248,6 +220,397 @@ include::partial$knative-objects.adoc[tag=knative-event-services]
 ==== triggers
 include::partial$knative-objects.adoc[tag=knative-triggers]
 
+
+[#eventing-trigger-verification]
+== Verification
+
+ifndef::workshop[]
+[tabs]
+====
+kubectl::
++
+--
+
+Pull out the subscriberURI for `eventhingaloha`:
+
+[#eventing-triggers-verify-sub1]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+kubectl get trigger helloaloha -o jsonpath='{.status.subscriberURI}'
+----
+copyToClipboard::eventing-triggers-verify-sub1[]
+
+The command should show the output as: 
+http://eventingaloha.{tutorial-namespace}.svc.cluster.local
+
+Pull out the subscriberURI for `eventhingbonjour`:
+
+[#eventing-triggers-verify-sub2]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+kubectl get trigger hellobonjour -o jsonpath='{.status.subscriberURI}'
+----
+copyToClipboard::eventing-triggers-verify-sub2[]
+
+The command should show the output as: 
+
+http://eventingbonjour.{tutorial-namespace}.svc.cluster.local
+
+As well as broker's subscriberURI:
+
+[#eventing-triggers-verify-sub3]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+kubectl get broker default -o jsonpath='{.status.address.url}'
+----
+copyToClipboard::eventing-triggers-verify-sub3[]
+
+The command should show the output as: 
+http://default-broker.{tutorial-namespace}.svc.cluster.local
+
+--
+endif::[]
+oc::
++
+--
+Pull out the subscriberURI for `eventhingaloha`:
+
+[#oc-eventing-triggers-verify-sub1]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+oc get trigger helloaloha -o jsonpath='{.status.subscriberURI}'
+----
+copyToClipboard::oc-eventing-triggers-verify-sub1[]
+
+The command should show the output as: 
+http://eventingaloha.{tutorial-namespace}.svc.cluster.local
+
+Pull out the subscriberURI for `eventhingbonjour`:
+
+[#oc-eventing-triggers-verify-sub2]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+oc get trigger hellobonjour -o jsonpath='{.status.subscriberURI}'
+----
+copyToClipboard::oc-eventing-triggers-verify-sub2[]
+
+The command should show the output as: 
+
+http://eventingbonjour.{tutorial-namespace}.svc.cluster.local
+
+As well as broker's subscriberURI:
+
+[#oc-eventing-triggers-verify-sub3]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+oc get broker default -o jsonpath='{.status.address.url}'
+----
+copyToClipboard::oc-eventing-triggers-verify-sub3[]
+
+The command should show the output as: 
+http://default-broker.{tutorial-namespace}.svc.cluster.local
+ifndef::workshop[]
+--
+====
+endif::[]
+
+You should notice that the subscriberURIs are Kubernetes services with the suffix of `{tutorial-namespace}.svc.cluster.local`.  This means they can be interacted with from another pod within the Kubernetes cluster.
+
+Now that you have setup the Broker and Triggers you need to send in some test messages to see the behavior.
+
+First start streaming the logs for the event consumers:
+
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+$ *stern eventing -c user-container*
+----
+
+Then create a pod for using the `curl` command:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: curler
+  name: curler
+spec:
+  containers:
+  - name: curler
+    image: fedora:29 # <1>
+    tty: true
+----
+
+<1> You can use any image that includes a curl command.
+
+Then exec into the `curler` pod:
+
+ifndef::workshop[]
+[tabs]
+====
+kubectl::
++
+--
+
+Create the `curler` pod:
+
+[#trigger-verify-curler]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+kubectl -n {tutorial-namespace} apply -f curler.yaml
+-----
+copyToClipboard::trigger-verify-curler[]
+
+Exec into the `curler` pod:
+
+[trigger-verify-exec-curler]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+kubectl -n {tutorial-namespace} exec -it curler -- /bin/bash
+----
+copyToClipboard::trigger-verify-exec-curler[]
+
+--
+endif::[]
+oc::
++
+--
+
+Create the `curler` pod:
+
+[#oc-trigger-verify-curler]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+oc -n {tutorial-namespace} apply -f curler.yaml
+-----
+copyToClipboard::oc-trigger-verify-curler[]
+
+Exec into the `curler` pod:
+
+[oc-trigger-verify-exec-curler]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+oc -n {tutorial-namespace} exec -it curler -- /bin/bash
+----
+copyToClipboard::oc-trigger-verify-exec-curler[]
+
+ifndef::workshop[]
+--
+====
+endif::[]
+
+Using the `curler` pod's shell, curl the subcriberURI for eventingaloha:
+
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+$ *curl -v "http://eventingaloha.{tutorial-namespace}.svc.cluster.local" \
+-X POST \
+-H "Ce-Id: say-hello" \
+-H "Ce-Specversion: 1.0" \
+-H "Ce-Type: aloha" \
+-H "Ce-Source: mycurl" \
+-H "Content-Type: application/json" \
+-d '{"key":"from a curl"}'*
+----
+
+You will then see `eventingaloha` will scale-up to respond to that event:
+
+ifndef::workshop[]
+[tabs]
+====
+kubectl::
++
+--
+[#trigger-watch-aloha-scale]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch kubectl get pods
+-----
+copyToClipboard::trigger-watch-aloha-scale[]
+
+The command above should show the following output:
+
+[source,bash]
+-----
+NAME                                        READY STATUS  AGE
+curler                                      1/1   Running 59s
+default-broker-filter-c6654bccf-vxm5m       1/1   Running 11m
+default-broker-ingress-7479966dc7-pvtx6     1/1   Running 11m
+eventingaloha-1-deployment-6cdc888d9d-9xnnn 2/2   Running 30s
+-----
+--
+oc::
++
+--
+[#oc-trigger-watch-aloha-scale]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch oc get pods
+-----
+copyToClipboard::oc-trigger-watch-aloha-scale[]
+
+The command above should show the following output:
+
+[source,bash]
+-----
+NAME                                        READY STATUS  AGE
+curler                                      1/1   Running 59s
+default-broker-filter-c6654bccf-vxm5m       1/1   Running 11m
+default-broker-ingress-7479966dc7-pvtx6     1/1   Running 11m
+eventingaloha-1-deployment-6cdc888d9d-9xnnn 2/2   Running 30s
+-----
+endif::[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+
+Next, curl the subcriberURI for `eventingbonjour`:
+
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+$ *curl -v "http://eventingbonjour.{tutorial-namespace}.svc.cluster.local" \
+-X POST \
+-H "Ce-Id: say-hello" \
+-H "Ce-Specversion: 1.0" \
+-H "Ce-Type: bonjour" \
+-H "Ce-Source: mycurl" \
+-H "Content-Type: application/json" \
+-d '{"key":"from a curl"}'*
+----
+
+And you will see the `eventingbonjour` pod scale up:
+
+ifndef::workshop[]
+[tabs]
+====
+kubectl::
++
+--
+[#trigger-watch-eventingbonjour-scale]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch kubectl get pods
+-----
+copyToClipboard::trigger-watch-eventingbonjour-scale[]
+
+The command above should show the following output:
+
+[source,bash]
+-----
+NAME                                         READY STATUS  AGE
+curler                                       1/1   Running 82s
+default-broker-filter-c6654bccf-vxm5m        1/1   Running 11m
+default-broker-ingress-7479966dc7-pvtx6      1/1   Running 11m
+eventingaloha-1-deployment-6cdc888d9d-9xnnn  2/2   Running 53s
+eventingbonjour-1-deployment-fc7858b5b-s9prj 2/2   Running 5s
+-----
+--
+oc::
++
+--
+[#oc-trigger-watch-eventingbonjour-scale]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch oc get pods
+-----
+copyToClipboard::oc-trigger-watch-eventingbonjour-scale[]
+
+The command above should show the following output:
+
+[source,bash]
+-----
+NAME                                         READY STATUS  AGE
+curler                                       1/1   Running 82s
+default-broker-filter-c6654bccf-vxm5m        1/1   Running 11m
+default-broker-ingress-7479966dc7-pvtx6      1/1   Running 11m
+eventingaloha-1-deployment-6cdc888d9d-9xnnn  2/2   Running 53s
+eventingbonjour-1-deployment-fc7858b5b-s9prj 2/2   Running 5s
+-----
+endif::[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+Now, trigger both `eventingaloha` and `eventingbonjour` by curling the subcriberURI for the broker:
+
+[#trigger-verify-trigger-all]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+curl -v "http://default-broker.{tutorial-namespace}.svc.cluster.local" \
+-X POST \
+-H "Ce-Id: say-hello" \
+-H "Ce-Specversion: 1.0" \
+-H "Ce-Type: greeting" \
+-H "Ce-Source: mycurl" \
+-H "Content-Type: application/json" \
+-d '{"key":"from a curl"}'
+----
+copyToClipboard::trigger-verify-trigger-all[]
+
+[NOTE]
+====
+"Ce-Type: greeting" is the key to insuring that both aloha and bonjour respond to this event
+====
+
+And by watching the *{tutorial-namespace}* namespace, you will see both `eventingaloha` and `eventingbonjour` will come to life:
+
+ifndef::workshop[]
+[tabs]
+====
+kubectl::
++
+--
+[#trigger-watch-all-scale]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch kubectl get pods
+-----
+copyToClipboard::trigger-watch-eventingbonjour-scale[]
+
+The command above should show the following output:
+
+[source,bash]
+-----
+NAME                                         READY STATUS  AGE
+curler                                       1/1   Running 3m21s
+default-broker-filter-c6654bccf-vxm5m        1/1   Running 13m
+default-broker-ingress-7479966dc7-pvtx6      1/1   Running 13m
+eventingaloha-1-deployment-6cdc888d9d-nlpm8  2/2   Running 6s
+eventingbonjour-1-deployment-fc7858b5b-btdcr 2/2   Running 6s
+-----
+--
+oc::
++
+--
+[#oc-trigger-watch-all-scale]
+[source,bash,subs="+quotes,attributes+,+macros"]
+-----
+watch oc get pods
+-----
+copyToClipboard::oc-trigger-watch-eventingbonjour-scale[]
+
+The command above should show the following output:
+
+[source,bash]
+-----
+NAME                                         READY STATUS  AGE
+curler                                       1/1   Running 3m21s
+default-broker-filter-c6654bccf-vxm5m        1/1   Running 13m
+default-broker-ingress-7479966dc7-pvtx6      1/1   Running 13m
+eventingaloha-1-deployment-6cdc888d9d-nlpm8  2/2   Running 6s
+eventingbonjour-1-deployment-fc7858b5b-btdcr 2/2   Running 6s
+-----
+endif::[]
+ifndef::workshop[]
+--
+====
+endif::[]
+
+You can experiment by using different type filters in the Subscription to see how the different subscribed services respond. `Filters` may use an CloudEvent attribute for its criteria.
 
 [#eventing-cleanup]
 == Cleanup
@@ -286,6 +649,4 @@ copyToClipboard::eventing-run-oc-trigger-broker-cleanup[]
 ifndef::workshop[]
 --
 ====
-
-NOTE: You can also delete xref:knative-tutorial-build:ROOT:build.adoc#build-apply-prereq-resources[pre-req resources] that were created if you don't need them anymore.
 endif::[]

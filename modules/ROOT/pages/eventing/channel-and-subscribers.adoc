@@ -1,8 +1,14 @@
-= Eventing - Source to Subscriber
+[[channels-and-subs]]
+== Channel and Subscribers
 include::_attributes.adoc[]
-
 //Define vars
 :greeter-image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
+
+Channels::
+  Channels are an event forwarding and persistence layer where each channel is a separate Kubernetes Custom Resource.  A Channel may be backed by Apache Kafka or InMemoryChannel.  This recipe focuses on InMemoryChannel.
+
+Subscriptions::
+  Subscriptions are how you register your service to listen to a particular channel.
 
 [#eventing-channel]
 == Channel(Sink)
@@ -14,21 +20,13 @@ The https://en.wikipedia.org/wiki/Event-driven_architecture#Event_channel[channe
 .link:{github-repo}/{eventing-repo}/channel.yaml[channel.yaml]
 [source,yaml,linenums]
 ----
-apiVersion: eventing.knative.dev/v1alpha1
+apiVersion: messaging.knative.dev/v1alpha1
 kind: Channel
 metadata:
-  name: ch-event-greeter #<1>
-spec:
-  provisioner: #<2>
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: ClusterChannelProvisioner
-    name: in-memory
+  name: eventinghello-ch #<1> 
 ----
 
 <1> The name of the channel. Knative makes it addressable, i.e. resolveable to a target (a consumer service)
-<2> The channel provisioner which is responsible for provisioning this channel. Various messaging implementations provide their own channel(s) via __ClusterChannelProvisioner__.
-
-include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
 
 Run the following commands to create the channel:
 
@@ -72,8 +70,8 @@ Running  the above command should return the following result:
 
 [source,bash,subs="attributes+,+macros"]
 ----
-NAME                       AGE
-ch-event-greeter   39s
+NAME             READY URL
+eventinghello-ch True  http://eventinghello-ch-kn-channel.chapter-5.svc.cluster.local
 ----
 
 [#eventing-source]
@@ -87,28 +85,21 @@ The event source listens to external events e.g. a kafka topic or for a file on 
 [source,yaml,subs="attributes+,+macros"]
 ----
 apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: CronJobSource #<1>
+kind: CronJobSource
 metadata:
-  name: event-greeter-cronjob-source
+  name: my-cjs
 spec:
-  schedule: "* * * * *"
-  data: '{"message": "Thanks for doing Knative Tutorial"}'
-  sink: #<2>
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Channel
-    name: ch-event-greeter
+  schedule: "*/2 * * * *"
+  data: '{"message": "From CronJob Source"}'
+  sink:
+   ref:
+    apiVersion: messaging.knative.dev/v1alpha1 # <1>
+    kind: Channel # <2>
+    name: eventinghello-ch
 ----
 
-<1> The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
-<2> The channel(sink) where the event data will be drained
-
-[NOTE,subs="macros+"]
-====
-Event Source can define the attributes that it wishes to receive via the 
-spec. In the above example it defines **schedule**(the cron expression) and **data** that will be sent as part of the event.
-
-When you xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs], you will notice this data being delivered to the service.
-====
+<1> The Channel API is in api-group `messaging.eventing.knative.dev`
+<2> Kind is `Channel` instead of direct to a specific service; default is InMemoryChannel implementation
 
 Run the following commands to create the event source resources:
 
@@ -151,8 +142,8 @@ Running  the above command should return the following result:
 
 [source,bash,subs="attributes+,+macros"]
 ----
-NAME                       AGE
-event-greeter-cronjob-source  39s
+NAME     READY   AGE
+my-cjs   True    8s
 ----
 
 include::partial$eventing-snippets.adoc[tag=cronjob-source]
@@ -162,23 +153,114 @@ include::partial$eventing-snippets.adoc[tag=cronjob-source]
 
 The event subscription is responsible of connecting the channel(sink) with the service. Once a service connected to a channel it starts receiving the events (cloud events).
 
-[#eventing-create-subscriber]
-=== Create Channel Subscriber
+[#eventing-create-subscribers-services]
+=== Create Subscriber Services
 .link:{github-repo}/{eventing-repo}/channel-subscriber.yaml[channel-subscriber.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-include::ROOT:example$eventing/channel-subscriber.yaml[]
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: eventinghelloa
+spec:
+  template:
+    metadata:
+      name: eventinghelloa-v1 #<1>
+      annotations:
+        autoscaling.knative.dev/target: "1"
+    spec:
+      containers:
+      - image: quay.io/rhdevelopers/eventinghello:0.0.1
+----
+<1> The string of `eventinghelloa` will help you identify this particular service.
+
+[source,yaml]
+----
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: eventinghellob
+spec:
+  template:
+    metadata:
+      name: eventinghellob-v1 <1>
+      annotations:
+        autoscaling.knative.dev/target: "1"
+    spec:
+      containers:
+      - image: quay.io/rhdevelopers/eventinghello:0.0.1
 ----
 
-Run the following commands to create the channel subscriber:
+<1> The string of `eventinghellob` will help you identify this particular service.
 
-:doc-sec: create-subscriber
-:url: {github-repo}/{eventing-repo}/channel-subscriber.yaml
-:url-alt-text: channel-subscriber.yaml
+:doc-sec: create-subscriber-svc-1
+:url: {github-repo}/{eventing-repo}/eventing-helloa-sink.yaml
+:url-alt-text: eventing-helloa-sink.yaml
+include::ROOT:partial$deploy-knative-resources.adoc[]
+
+
+:doc-sec: create-subscriber-svc-2
+:url: {github-repo}/{eventing-repo}/eventing-hellob-sink.yaml
+:url-alt-text: eventing-hellob-sink.yaml
+include::ROOT:partial$deploy-knative-resources.adoc[]
+
+[#eventing-create-subscriber]
+=== Create Channel Subscribers
+
+Now create the appropriate `Subscription` for `eventinghelloa` to the Channel `eventinghello-ch`:
+
+[source,yaml]
+----
+apiVersion: messaging.knative.dev/v1alpha1
+kind: Subscription
+metadata:
+  name: eventinghelloa-sub
+spec:
+  channel:
+    apiVersion: messaging.knative.dev/v1alpha1
+    kind: Channel
+    name: eventinghello-ch
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: eventinghelloa
+----
+
+And create the appropriate `Subscription` for `eventinghellob` to the Channel `eventinghello-ch`:
+
+[source,yaml]
+----
+apiVersion: messaging.knative.dev/v1alpha1
+kind: Subscription
+metadata:
+  name: eventinghellob-sub
+spec:
+  channel:
+    apiVersion: messaging.knative.dev/v1alpha1
+    kind: Channel
+    name: eventinghello-ch
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: eventinghellob
+----
+
+:doc-sec: create-subscriber-1
+:url: {github-repo}/{eventing-repo}/eventing-helloa-sub.yaml
+:url-alt-text: eventing-helloa-sub.yaml
+include::ROOT:partial$deploy-knative-resources.adoc[]
+
+
+:doc-sec: create-subscriber-2
+:url: {github-repo}/{eventing-repo}/eventing-hellob-sub.yaml
+:url-alt-text: eventing-hellob-sub.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
 [#eventing-verify-subscriber]
 ==== Verification
+
 ifndef::workshop[]
 [tabs]
 ====
@@ -209,10 +291,22 @@ endif::[]
 
 Running  the above command should return the following result:
 
+//TODO - update
 [source,bash,subs="attributes+,+macros"]
 ----
 NAME                       AGE
 event-greeter-subscriber  39s
+----
+
+If you wait approximately 2 minutes for the CronJobSource then you will see both `eventinghelloa` and `eventinghellob` begin to run in the {tutorial-namespace}.
+
+.Watch pods in the {tutorial-namespace}
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+NAME                                                      READY STATUS  AGE
+cronjobsource-my-cjs-93544f14-2bf9-11ea-83c7-08002737670c 1/1   Running 2m15s
+eventinghelloa-1-deployment-d86bf4847-hvbk6               2/2   Running 5s
+eventinghellob-1-deployment-5c986c7586-4clpb              2/2   Running 5s
 ----
 
 [#eventing-see-what-you-have-deployed]
@@ -229,32 +323,6 @@ include::partial$knative-objects.adoc[tag=knative-event-subscribers]
 
 TIP: Add `-oyaml` to the above commands to get more details about each object that were queried for. 
 
-[#eventing-subscriber-service]
-== Create subscriber Service 
-
-[#eventing-gen-subscriber-service]
-=== Generate Subscriber Service
-
-Run the following command to create the Knative service that will be used as the subscriber for the cron events:
-
-.link:{github-repo}/{eventing-repo}/service.yaml[service.yaml]
-[source,yaml,subs="attributes+,+macros"]
-----
-include::ROOT:example$eventing/service.yaml[]
-----
-
-[#eventing-deploy-subscriber-service]
-=== Deploy Subscriber Service
-
-Run the following commands to create the service:
-
-:doc-sec: deploy-sub-svc
-:url: {github-repo}/{eventing-repo}/service.yaml
-:url-alt-text: service.yaml
-include::ROOT:partial$deploy-knative-resources.adoc[]
-
-You can xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs] to see the cron job source sending an event every 1 minute.
-
 [#eventing-cleanup]
 == Cleanup
 ifndef::workshop[]
@@ -266,11 +334,11 @@ kubectl::
 [#eventing-run-cleanup2]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-kubectl -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
-kubectl -n {tutorial-namespace} delete \
- cronjobsources.sources.eventing.knative.dev  event-greeter-cronjob-source
-kubectl -n {tutorial-namespace} delete channels.eventing.knative.dev ch-event-greeter
-kubectl -n {tutorial-namespace} delete subscriptions.eventing.knative.dev event-greeter-subscriber
+kubectl -n {tutorial-namespace} delete -f eventing-helloa-sink.yaml
+kubectl -n {tutorial-namespace} delete -f eventing-helloa-sub.yaml
+kubectl -n {tutorial-namespace} delete -f eventing-hellob-sink.yaml
+kubectl -n {tutorial-namespace} delete -f eventing-hellob-sub.yaml
+kubectl -n {tutorial-namespace} delete -f eventinghello-source-ch.yaml
 ----
 copyToClipboard::eventing-run-cleanup2[]
 
@@ -282,17 +350,15 @@ endif::[]
 [#eventing-run-oc-cleanup2]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-oc -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
-oc -n {tutorial-namespace} delete \
- cronjobsources.sources.eventing.knative.dev  event-greeter-cronjob-source
-oc -n {tutorial-namespace} delete channels.eventing.knative.dev ch-event-greeter
-oc -n {tutorial-namespace} delete subscriptions.eventing.knative.dev event-greeter-subscriber
+oc -n {tutorial-namespace} delete -f eventing-helloa-sink.yaml
+oc -n {tutorial-namespace} delete -f eventing-helloa-sub.yaml
+oc -n {tutorial-namespace} delete -f eventing-hellob-sink.yaml
+oc -n {tutorial-namespace} delete -f eventing-hellob-sub.yaml
+oc -n {tutorial-namespace} delete -f eventinghello-source-ch.yaml
 ----
 copyToClipboard::eventing-run-oc-cleanup2[]
 ifndef::workshop[]
 --
 ====
-
-NOTE: You can also delete xref:knative-tutorial-build:ROOT:build.adoc#build-apply-prereq-resources[pre-req resources] that were created if you don't need them anymore.
 
 endif::[]

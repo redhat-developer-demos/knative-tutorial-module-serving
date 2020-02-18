@@ -1,4 +1,5 @@
-= Eventing Source to Service
+[[source-to-sink]]
+== Eventing Source to Sink
 include::_attributes.adoc[]
 
 //Define vars
@@ -8,30 +9,64 @@ include::_attributes.adoc[]
 [#eventing-source]
 == Event Source
 
-The event source listens to external events e.g. a kafka topic or for a file on a FTP server. It is responsible to drain the received event(s) along with its data to a configured https://en.wikipedia.org/wiki/Sink_(computing)[sink].
+*Knative Eventing Sources* are software components that emit events.  The job of a Source is to connect to, drain, capture and potentially buffer events; often from an external system and then relay those events to the *Sink*.
 
-include::partial$eventing-snippets.adoc[tag=eventing-nav-folder]
+Knative Eventing Sources installs the following four sources out-of-the-box:
 
-[#eventing-create-event-source]
-=== Create Event Source
-.link:{github-repo}/{eventing-repo}/knative/event-source-svc.yaml[event-source-svc.yaml]
+[source,bash,subs="+quotes,attributes+,+macros"]
+----
+$ *kubectl api-resources --api-group='sources.eventing.knative.dev'*
+NAME              APIGROUP                      NAMESPACED   KIND
+apiserversources  sources.eventing.knative.dev  true         ApiServerSource
+containersources  sources.eventing.knative.dev  true         ContainerSource
+cronjobsources    sources.eventing.knative.dev  true         CronJobSource
+sinkbindings      sources.eventing.knative.dev  true         SinkBinding
+----
+
+.link:{github-repo}/{eventing-repo}/eventing-hello-sink.yaml[eventing-hello-sink.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-apiVersion: sources.eventing.knative.dev/v1alpha1
+apiVersion: sources.eventing.knative.dev/v1
 kind: CronJobSource #<1>
 metadata:
   name: event-greeter-cronjob-source
-spec:
-  schedule: "* * * * *"
+spec: #<2>
+  schedule: "*/2 * * * *"
   data: '{"message": "Thanks for doing Knative Tutorial"}'
-  sink: #<2>
-    apiVersion: serving.knative.dev/v1alpha1
+  sink: 
+    apiVersion: serving.knative.dev/v1
     kind: Service
-    name: event-greeter
+    name: eventinghello
 ----
 
 <1> The type of event source, the eventing system deploys a bunch of sources out of the box and it also provides way to deploy custom resources
-<2> The service(sink) where the event data will be sent
+<2> spec will be unique per source, per kind
+
+
+[#eventing-sink]
+== Event Sink
+
+*Knative Eventing Sink* is how you specify the event receiver -- that is the consumer of the event--. Sinks can be invoked directly in a point-to-point fashion by referencing them via the Event Source's `sink` as shown below:
+
+.link:{github-repo}/{eventing-repo}/eventing-hello-sink.yaml[eventing-hello-sink.yaml]
+[source,yaml,subs="attributes+,+macros"]
+----
+apiVersion: sources.eventing.knative.dev/v1
+kind: CronJobSource
+metadata:
+  name: event-greeter-cronjob-source
+spec:
+  schedule: "*/2 * * * *"
+  data: '{"message": "Thanks for doing Knative Tutorial"}'
+  sink:  #<1>
+    apiVersion: serving.knative.dev/v1 #<2>
+    kind: Service
+    name: eventinghello #<3>
+----
+
+<1> sink can target any Kubernetes Service or 
+<2> a Knative Service
+<3> Deployed as "eventinghello"
 
 [NOTE]
 ====
@@ -43,8 +78,11 @@ When you xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs], you
 
 Run the following commands to create the event source resources:
 
+[#eventing-create-event-source]
+=== Create Event Source
+
 :doc-sec: event-src-svc
-:url: {github-repo}/{eventing-repo}/knative/event-source-svc.yaml
+:url: {github-repo}/{eventing-repo}/eventing-hello-sink.yaml
 :url-alt-text: event-source-svc.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
@@ -91,15 +129,12 @@ include::partial$eventing-snippets.adoc[tag=cronjob-source]
 [#eventing-sink-service]
 == Create Sink Service 
 
-[#eventing-gen-sink-service]
-=== Generate Sink Service
-
 Run the following command to create the Knative service that will be used as the subscriber for the cron events:
 
-.link:{github-repo}/{eventing-repo}/knative/service.yaml[service.yaml]
+.link:{github-repo}/{eventing-repo}/eventinghello-source.yaml[eventinghello-source.yaml]
 [source,yaml,subs="attributes+,+macros"]
 ----
-include::ROOT:example$eventing/service.yaml[]
+include::ROOT:example$eventing/eventinghello-source.yaml[]
 ----
 
 [#eventing-deploy-sink-service]
@@ -108,8 +143,8 @@ include::ROOT:example$eventing/service.yaml[]
 Run the following commands to create the service:
 
 :doc-sec: deploy-sink-service
-:url: {github-repo}/{eventing-repo}/knative/service.yaml
-:url-alt-text: service.yaml
+:url: {github-repo}/{eventing-repo}/eventing/eventinghello-source.yaml
+:url-alt-text: eventinghello-source.yaml
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
 You can xref:{eventing-repo}/eventing.adoc#eventing-watch-logs[watch logs] to see the cron job source sending an event every 1 minute.
@@ -134,9 +169,8 @@ kubectl::
 [#eventing-run-src-svc-cleanup]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-kubectl -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
-kubectl -n {tutorial-namespace} delete \
- cronjobsources.sources.eventing.knative.dev  event-greeter-cronjob-source
+kubectl -n {tutorial-namespace} delete -f eventinghello-source.yaml
+kubectl -n {tutorial-namespace} delete -f eventing-hello-sink.yaml
 ----
 copyToClipboard::eventing-run-src-svc-cleanup[]
 
@@ -148,16 +182,13 @@ endif::[]
 [#eventing-run-oc-src-svc-cleanup]
 [source,bash,subs="attributes+,+macros",linenums]
 ----
-oc -n {tutorial-namespace} delete services.serving.knative.dev event-greeter
-oc -n {tutorial-namespace} delete \
- cronjobsources.sources.eventing.knative.dev  event-greeter-cronjob-source
+oc -n {tutorial-namespace} delete -f eventinghello-source.yaml
+oc -n {tutorial-namespace} delete -f eventing-hello-sink.yaml
 ----
 copyToClipboard::eventing-run-oc-src-svc-cleanup[]
 ifndef::workshop[]
 --
 ====
-
-NOTE: You can also delete xref:knative-tutorial-build:ROOT:build.adoc#build-apply-prereq-resources[pre-req resources] that were created if you don't need them anymore.
 
 endif::[]
 
