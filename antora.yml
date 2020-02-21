@@ -1,4 +1,4 @@
-name: knative-tutorial-basics
+name: knative-tutorial-serving
 title: Knative Serving
 version: master
 nav:
