@@ -1,5 +1,5 @@
 name: knative-tutorial-basics
-title: Introduction to Knative
+title: Knative Serving
 version: master
 nav:
   - modules/ROOT/nav.adoc
