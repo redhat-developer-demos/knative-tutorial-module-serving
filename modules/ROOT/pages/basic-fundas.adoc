@@ -21,7 +21,7 @@ endif::[]
 [#basics-deploy-service]
 == Deploy Service
 
-Navigate to the tutorial chapter's `knative` folder:
+Navigate to the tutorial chapter's folder {basics-repo}:
 
 [#basics-nav-folder]
 [source,bash,subs="+macros,+attributes"]
