@@ -17,7 +17,7 @@ jobs:
           repository: redhat-developer-docs/knative-tutorial-staging
           path: knative-tutorial
       - name: "Generate site using antora site action"
-        uses: kameshsampath/antora-site-action@use_repo_path
+        uses: kameshsampath/antora-site-action@use-repo-path
         with:
          site_sources_path: "knative-tutorial"
          antora_playbook: staging.yaml
