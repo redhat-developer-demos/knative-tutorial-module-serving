@@ -31,7 +31,7 @@ The command above should return an output like:
 
 [source,bash]
 ----
-chectl/7.2.0 darwin-x64 node-v10.16.3
+chectl/7.9.0 darwin-x64 node-v10.19.0
 ----
 
 NOTE: The above output is an example from macOS (darwin), the OS information in output may vary based on your OS

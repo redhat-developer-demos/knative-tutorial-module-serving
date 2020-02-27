@@ -13,7 +13,7 @@ oc version
 ----
 copyToClipboard::oc-version-check[]
 
-The output should show oc version >=4.1
+The output should show oc version >=4.2
 
 [source,bash]
 ----

@@ -1,4 +1,4 @@
-apiVersion: serving.knative.dev/v1alpha1
+apiVersion: serving.knative.dev/v1
 kind: Revision
 metadata:
   annotations:
@@ -13,14 +13,14 @@ metadata:
   name: greeter-7cqzq
   namespace: knativetutorial
   ownerReferences:
-  - apiVersion: serving.knative.dev/v1alpha1
+  - apiVersion: serving.knative.dev/v1
     blockOwnerDeletion: true
     controller: true
     kind: Configuration
     name: greeter
     uid: 2f89f930-b7fa-11e9-96b1-22e0f431a3ed
   resourceVersion: "40312"
-  selfLink: /apis/serving.knative.dev/v1alpha1/namespaces/knativetutorial/revisions/greeter-7cqzq
+  selfLink: /apis/serving.knative.dev/v1/namespaces/knativetutorial/revisions/greeter-7cqzq
   uid: 49e30221-b7fa-11e9-96b1-22e0f431a3ed
 spec:
   containers:

@@ -1,4 +1,4 @@
-apiVersion: serving.knative.dev/v1alpha1
+apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   annotations:
@@ -9,7 +9,7 @@ metadata:
   name: greeter
   namespace: knativetutorial
   resourceVersion: "35193"
-  selfLink: /apis/serving.knative.dev/v1alpha1/namespaces/knativetutorial/services/greeter
+  selfLink: /apis/serving.knative.dev/v1/namespaces/knativetutorial/services/greeter
   uid: c4ee1f47-b77f-11e9-96b1-22e0f431a3ed
 spec:
   template:
