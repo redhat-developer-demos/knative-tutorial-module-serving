@@ -21,6 +21,15 @@ include::partial$prereq-cli.adoc[]
 
 endif::[]
 
+Navigate to the tutorial chapter's `{basics-repo}` folder:
+
+[#scaling-navigate-to-basics]
+[source,bash,subs="attributes+,+macros"]
+----
+cd $TUTORIAL_HOME/{basics-repo}
+----
+copyToClipboard::scaling-navigate-to-basics[]
+
 [#scaling-deploy-service]
 == Deploy Service
 
@@ -31,15 +40,6 @@ The following snippet shows what a Knative service YAML will look like:
 ----
 include::ROOT:example$basics/{service-file}[]
 ----
-
-Navigate to the tutorial chapter's `knative` folder:
-
-[#scaling-navigate-to-basics]
-[source,bash,subs="attributes+,+macros"]
-----
-cd $TUTORIAL_HOME/{basics-repo}
-----
-copyToClipboard::scaling-navigate-to-basics[]
 
 The service can be deployed using the command:
 
@@ -84,7 +84,7 @@ endif::[]
 
 The last `http` command should return a response like **Hi  greeter => '9be9ccd9a2e3' : 1**
 
-Check <<02-basic-fundas.adoc#see-what-you-have-deployed,deployed Knative resources>> for more details on which Knative objects and resources have been created with the service deployment above.
+Check xref:ROOT:basic-fundas.adoc#basics-see-what-you-have-deployed[deployed Knative resources] for more details on which Knative objects and resources have been created with the service deployment above.
 
 [#scaling-scale-to-zero]
 == Scale to zero 
@@ -95,7 +95,7 @@ Scale-to-zero is one of the main properties making Knative a serverless platform
 
 If another request tries to get to this revision, the activator will get it, instruct the autoscaler to create new pods for the revision as quickly as possible and buffer the request until those new pods are created.
 
-By default the **scale-to-zero-grace-period** is `30s`, and the **stable-window** is `60s`. Firing a request to the greeter service will bring up the pod (if it is already terminated, as described above) to serve the request. Leaving it without any further requests will automatically cause it to scale to zero in approx `110 secs`. There are at least 20 seconds after the pod starts to terminate and before it's completely terminated. This gives Istio enough time to leave out the pod from its own networking configuration.
+By default the **scale-to-zero-grace-period** is `30s`, and the **stable-window** is `60s`. Firing a request to the greeter service will bring up the pod (if it is already terminated, as described above) to serve the request. Leaving it without any further requests will automatically cause it to scale to zero in approx `60-70 secs`. There are at least 20 seconds after the pod starts to terminate and before it's completely terminated. This gives Istio enough time to leave out the pod from its own networking configuration.
 
 For better clarity and understanding let us <<scaling-cleanup,clean up>> the deployed Knative resources before going to next section.
 
@@ -119,7 +119,7 @@ include::ROOT:example$scaling/{service-file}[]
 The Knative service definition above will allow each service pod to handle max of 10 in-flight requests per pod (configured via `autoscaling.knative.dev/target` annotation) before automatically scaling to new pod(s)
 
 ifdef::workshop[]
-Navigate to the tutorial chapter's `knative` folder:
+Navigate to the tutorial chapter's `basics` folder:
 
 [#scaling-navigate-back]
 [source,bash,subs="attributes+,+macros"]
@@ -223,7 +223,7 @@ In real world scenarios your service might need to handle sudden spikes in reque
 
 The following example shows how to make Knative create services that start with a replica count of **2** and never scale below it.
 
-:service-file: service-min-scale.yaml
+:service-file: service-min-max-scale.yaml
 :greeter-image: quay.io/rhdevelopers/prime-generator:v27-quarkus
 
 [#scaling-deploy-service-minscale]
