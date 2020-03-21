@@ -191,7 +191,7 @@ greeter-v1-deployment-6f75dfd9d8-s5bvr   2/2     Running   5s
 As an exercise, flip all the traffic back to `greeter-v2` (green). You need to edit the traffic block of the service-pinned.yaml and update the revision name to `greeter-v2`. After you redeploy the `service-pinned.yaml`, try calling the service again to notice the difference. If everything went smooth you will notice the service calls will now go to only `greeter-v2`.
 ====
 
-[[canary]]
+[[canary-release]]
 == Applying Canary Release Pattern
 
 A Canary release is more effective when you want to reduce the risk of introducing new feature. It allows you a more effective feature-feedback loop before rolling out the change to your entire user base.

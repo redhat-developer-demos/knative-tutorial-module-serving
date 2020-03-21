@@ -42,7 +42,6 @@ endif::[]
 ** xref:traffic-distribution.adoc#deploying-revisions[Arbitrary Revision Names]
 ** xref:traffic-distribution.adoc#blue-green[Blue-Green Deployment]
 ** xref:traffic-distribution.adoc#canary-release[Canary Release]
-** xref:traffic-distribution.adoc#service-visibility[Service Visibility]
 
 ifdef::workshop[]
 * xref:scaling.adoc[Auto Scaling]
