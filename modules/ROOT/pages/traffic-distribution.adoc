@@ -99,8 +99,8 @@ spec:
 
 The above service definition creates three sub-routes(named after traffic **tags**) to existing `greeter` route.
 
-- **current** - The revision is going to have all 100% traffic distribution
-- **prev** - The previously active revision, which will now have zero traffic 
+- **v1** - The revision is going to have all 100% traffic distribution
+- **v2** - The previously active revision, which will now have zero traffic 
 - **latest** - The route pointing to any latest service deployment, by setting to zero we are making sure the latest revision is not picked up automatically.
 
 [NOTE]
