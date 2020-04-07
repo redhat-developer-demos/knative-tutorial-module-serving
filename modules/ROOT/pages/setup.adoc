@@ -1,4 +1,5 @@
 = Setup
+include::_attributes.adoc[]
 
 [[tutorial-all-local]]
 == CLI tools
@@ -67,8 +68,6 @@ git clone https://github.com/redhat-developer-demos/knative-tutorial &&\
 export TUTORIAL_HOME="$(pwd)/knative-tutorial"
 ----
 copyToClipboard::cloneRepo[]
-
-include::_attributes.adoc[]
 
 ifndef::workshop[]
 [IMPORTANT,subs="attributes+,+macros"]
