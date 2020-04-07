@@ -8,7 +8,7 @@
 :experimental:
 :minikube-version: v1.7.2
 :knative-version: v0.12.0
-:openshift-version: v4.1+
+:openshift-version: v4.1
 :knative-istio-version: 1.3.6
 :kubernetes-version: v1.15.0
 
