@@ -142,11 +142,24 @@ kn service describe greeter
 ----
 copyToClipboard::run-kn-desc-ksvc[]
 
-The describe should show you an exhaustive YAML like
+The describe should show you a short summary of your service : 
 
-[source,yaml]
+[source,bash]
 ----
-include::ROOT:example$kn/kn_ksvc_desc.yaml[]
+Name:       greeter
+Namespace:  knativetutorial
+Age:        1m
+URL:        http://greeter.knativetutorial.example.com
+
+Revisions:  
+  100%  @latest (greeter-twpgf-1) [1] (1m)
+        Image:  quay.io/rhdevelopers/knative-tutorial-greeter:quarkus (pinned to 767e2f)
+
+Conditions:  
+  OK TYPE                   AGE REASON
+  ++ Ready                  34s 
+  ++ ConfigurationsReady    34s 
+  ++ RoutesReady            34s 
 ----
 
 [#kn-delete-ksvc]
@@ -213,11 +226,23 @@ kn revision describe greeter-7cqzq
 ----
 copyToClipboard::run-kn-desc-rev[]
 
-The command should return a YAML like
+The command should return a output like
 
-[source,yaml]
+[source,bash]
 ----
-include::ROOT:example$kn/kn_rev_desc.yaml[]
+Name:       greeter-twpgf-1
+Namespace:  knativetutorial
+Age:        10m
+Image:      quay.io/rhdevelopers/knative-tutorial-greeter:quarkus (pinned to 767e2f)
+Service:    greeter
+
+Conditions:  
+  OK TYPE                  AGE REASON
+  ++ Ready                  9m 
+  ++ ContainerHealthy       9m 
+  ++ ResourcesAvailable     9m 
+   I Active                 8m NoTraffic
+
 ----
 
 [#kn-revisions-delete]
