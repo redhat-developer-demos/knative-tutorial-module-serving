@@ -182,7 +182,7 @@ Kubernetes::
 [source,bash,subs="attributes+,+macros",linenums]
 ----
 hey -c 50 -z 10s \
-  -H "Host:prime-generator.knativetutorial.example.com" \
+  -host "prime-generator.knativetutorial.example.com" \
   "http://pass:[${IP_ADDRESS}]/?sleep=3&upto=10000&memload=100"
 ----
 copyToClipboard::scaling-run-siege[]
