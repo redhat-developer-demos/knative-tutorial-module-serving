@@ -184,9 +184,14 @@ Now that you have installed the Knative Serving and Eventing CRDs, the following
 All *Knative Serving* resources will be under the API group called `serving.knative.dev`.
 
 .serving.knative.dev
+
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **kubectl api-resources --api-group='serving.knative.dev'**
+kubectl api-resources --api-group='serving.knative.dev'
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME             SHORTNAMES      APIGROUP              NAMESPACED   KIND
 configurations   config,cfg      serving.knative.dev   true         Configuration
 revisions        rev             serving.knative.dev   true         Revision
@@ -204,7 +209,11 @@ All *Knative Eventing* resources will be under the one of following API groups:
 .messaging.knative.dev
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **kubectl api-resources --api-group='messaging.knative.dev'**
+kubectl api-resources --api-group='messaging.knative.dev'
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME               SHORTNAMES   APIGROUP                NAMESPACED   KIND
 channels           ch           messaging.knative.dev   true         Channel
 inmemorychannels   imc          messaging.knative.dev   true         InMemoryChannel
@@ -216,7 +225,11 @@ subscriptions      sub          messaging.knative.dev   true         Subscriptio
 .eventing.knative.dev
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **kubectl api-resources --api-group='eventing.knative.dev'**
+kubectl api-resources --api-group='eventing.knative.dev'
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME         SHORTNAMES   APIGROUP               NAMESPACED   KIND
 brokers                   eventing.knative.dev   true         Broker
 eventtypes                eventing.knative.dev   true         EventType
@@ -226,7 +239,11 @@ triggers                  eventing.knative.dev   true         Trigger
 .sources.eventing.knative.dev
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **kubectl api-resources --api-group='sources.eventing.knative.dev'**
+kubectl api-resources --api-group='sources.eventing.knative.dev'
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME               SHORTNAMES   APIGROUP                       NAMESPACED   KIND
 apiserversources                sources.eventing.knative.dev   true         ApiServerSource
 containersources                sources.eventing.knative.dev   true         ContainerSource
@@ -237,7 +254,11 @@ sinkbindings                    sources.eventing.knative.dev   true         Sink
 .sources.knative.dev
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **kubectl api-resources --api-group='sources.knative.dev'**
+kubectl api-resources --api-group='sources.knative.dev'
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME               SHORTNAMES   APIGROUP              NAMESPACED   KIND
 apiserversources                sources.knative.dev   true         ApiServerSource
 sinkbindings                    sources.knative.dev   true         SinkBinding
@@ -261,7 +282,11 @@ This process will take few minutes for the Knative Serving pods to be up and run
 .Knative Serving pods
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **watch kubectl get pods -n knative-serving**
+watch kubectl get pods -n knative-serving
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME                          READY   STATUS    RESTARTS   AGE
 activator-6b49796b46-g66z2    1/1     Running   0          11m
 autoscaler-7b46fcb475-cnbrm   1/1     Running   0          11m
@@ -283,7 +308,11 @@ copyToClipboard::run-install-kourier[]
 .Kourier pods
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **watch kubectl get pods -n kourier-system**
+watch kubectl get pods -n kourier-system
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME                                      READY   STATUS    RESTARTS   AGE
 3scale-kourier-control-77459dcc76-56pkc   1/1     Running   0          55s
 3scale-kourier-gateway-8645d88bf6-gvbf7   1/1     Running   0          56s
@@ -320,7 +349,11 @@ Like Knative Serving deployment, Knative Eventing deployment will also take few 
 .Knative eventing pods
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ **watch kubectl get pods -n knative-eventing**
+watch kubectl get pods -n knative-eventing
+----
+
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME                                   READY   STATUS    RESTARTS   AGE
 eventing-controller-69ffcc6f7d-9qb6z   1/1     Running   0          41s
 eventing-webhook-6c56fcd86c-n6mzc      1/1     Running   0          41s
