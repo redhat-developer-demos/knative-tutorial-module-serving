@@ -24,7 +24,7 @@ Kubernetes Version: v1.16.2
 
 [IMPORTANT]
 =====
-Please follow the https://docs.openshift.com/container-platform/4.3/serverless/installing-openshift-serverless.html[OpenShift] documentation, to have Knative components installed on your cluster.
+Please follow the https://docs.openshift.com/container-platform/4.3/serverless/installing_serverless/installing-openshift-serverless.html[OpenShift] documentation, to have Knative components installed on your cluster.
 =====
 
 **Navigate to tutorial project**
