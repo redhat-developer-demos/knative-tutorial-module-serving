@@ -196,9 +196,10 @@ The command should show a list of revisions like
 
 [source,bash]
 ----
-NAME            SERVICE   AGE   CONDITIONS   READY   REASON
-greeter-7cqzq   greeter   11s   4 OK / 4     True
-greeter-qctxv   greeter   56s   4 OK / 4     True
+NAME              SERVICE   TRAFFIC   TAGS   GENERATION   AGE   CONDITIONS   READY   REASON
+greeter-tjtpm-2   greeter   100%             2            98s   3 OK / 4     True    
+greeter-twpgf-1   greeter                    1            11h   3 OK / 4     True    
+
 ----
 
 [#kn-revisions-desc]
@@ -209,7 +210,7 @@ To get the details about a specific revision you can use the command:
 [#run-kn-desc-rev]
 [source,bash,subs="+macros,attributes+"]
 ----
-kn revision describe greeter-7cqzq
+kn revision describe greeter-twpgf-1
 ----
 copyToClipboard::run-kn-desc-rev[]
 
