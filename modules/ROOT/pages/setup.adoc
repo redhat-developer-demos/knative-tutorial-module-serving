@@ -17,7 +17,7 @@ The following CLI tools are required for running the exercises in this tutorial.
 
 | `Docker`
 | https://docs.docker.com/docker-for-mac/install[Docker for Mac]
-| `dnf install docker`
+| `dnf install podman-docker`
 | https://docs.docker.com/docker-for-windows/install[Docker for Windows]
 
 | `kubectl {kubernetes-version}`
