@@ -100,15 +100,36 @@ The service-based deployment strategy that we did now will create many Knative r
 
 include::partial$knative-objects.adoc[tag=knative-services]
 
+[.console-output]
+[source,bash]
+----
+NAME      URL                                          LATESTCREATED   LATESTREADY     READY
+greeter   http://greeter.knativetutorial.example.com   greeter-97nzs   greeter-97nzs   True
+----
+
 [#basics-show-knative-configs]
 === configuration
 
 include::partial$knative-objects.adoc[tag=knative-configs]
 
+[.console-output]
+[source,bash]
+----
+NAME      LATESTCREATED   LATESTREADY     READY
+greeter   greeter-97nzs   greeter-97nzs   True
+----
+
 [#basics-show-knative-routes]
 === routes
 
 include::partial$knative-objects.adoc[tag=knative-routes]
+
+[.console-output]
+[source,bash]
+----
+NAME      URL                                          READY
+greeter   http://greeter.knativetutorial.example.com   True
+----
 
 When the service was invoked with `http $IP_ADDRESS 'Host:greeter.knativetutorial.example.com'`, you noticed that we added a **Host** header to the request with value `greeter.knativetutorial.example.com`. This FQDN is automatically assigned to your Knative service by the Knative Routes and uses the following format: `**<service-name>.<namespace>.<domain-suffix>**`.
 
@@ -121,6 +142,13 @@ When the service was invoked with `http $IP_ADDRESS 'Host:greeter.knativetutoria
 === revisions
 :doc-sec: rev1
 include::partial$knative-objects.adoc[tag=knative-revisions]
+
+[.console-output]
+[source,bash]
+----
+NAME            CONFIG NAME   K8S SERVICE NAME   GENERATION   READY 
+greeter-97nzs   greeter       greeter-97nzs      1            True
+----
 
 [TIP]
 ====
@@ -173,6 +201,14 @@ Now if you list revisions, you will see two of them, named similar to `greeter-v
 === revisions
 :doc-sec: rev2
 include::partial$knative-objects.adoc[tag=knative-revisions]
+
+[.console-output]
+[source,bash]
+----
+NAME            CONFIG NAME   K8S SERVICE NAME   GENERATION   READY
+greeter-97nzs   greeter       greeter-97nzs      1            True
+greeter-v9fxj   greeter       greeter-v9fxj      2            True
+----
 
 <<basics-invoke-service,Invoking Service>> will now show an output like:
 [source,bash,subs="+macros,+attributes"]
