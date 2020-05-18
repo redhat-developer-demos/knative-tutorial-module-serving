@@ -48,7 +48,6 @@ endif::[]
 
 ifndef::workshop[]
 * xref:scaling.adoc[Scaling]
-** xref:scaling.adoc#scaling-prerequisite[Prerequisites]
 endif::[]
 ** xref:scaling.adoc#scaling-deploy-service[Deploy Service]
 ** xref:scaling.adoc#scaling-invoke-service[Invoke Service]
