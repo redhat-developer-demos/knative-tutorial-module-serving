@@ -110,12 +110,27 @@ If you observe the resource YAML above, we have added a special tag `latest`. Si
 
 Before you apply the resource `$BOOK_HOME/basics/service-pinned.yaml`, call the `greeter` service again to verify that it is still providing the response from `greeter-v2` that includes `Namaste`.
 
+[.console-input]
 [source,bash,subs="quotes,attributes+,+macros"]
 ----
-$ *$BOOK_HOME/bin/call.sh*
-Namaste  greeter => '9861675f8845' : 1
+$BOOK_HOME/bin/call.sh
+----
 
-$ *kubectl get pods*
+[.console-output]
+[source,bash,subs="quotes,attributes+,+macros"]
+----
+Namaste  greeter => '9861675f8845' : 1
+----
+
+[.console-input]
+[source,bash,subs="quotes,attributes+,+macros"]
+----
+kubectl get pods
+----
+
+[.console-output]
+[source,bash,subs="quotes,attributes+,+macros"]
+----
 NAME                                    READY   STATUS    AGE
 greeter-v2-deployment-9984bb56d-gr4gp   2/2     Running   14s
 ----
@@ -123,6 +138,7 @@ greeter-v2-deployment-9984bb56d-gr4gp   2/2     Running   14s
 Now apply the update Knative service configuration using the command as shown in following listing:
 
 .Create greeter deployment (blue)
+[.console-input]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
 kubectl -n {tutorial-namespace} apply -f service-pinned.yaml
@@ -131,35 +147,13 @@ kubectl -n {tutorial-namespace} apply -f service-pinned.yaml
 
 Let us list the available sub-routes:
 
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
 [#run-traffic-sub-routes]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl -n {tutorial-namespace} get ksvc greeter -oyaml \
  | yq r - 'status.traffic[*].url'
 ----
-copyToClipboard::run-traffic-sub-routes[]
---
-oc::
-+
---
-endif::[]
-[#run-oc-traffic-sub-routes]
-[source,bash,subs="+macros,+attributes"]
-----
-oc -n {tutorial-namespace} get ksvc greeter -oyaml \
-  | yq r - 'status.traffic[*].url'
-----
-copyToClipboard::run-oc-traffic-sub-routes[]
-ifndef::workshop[]
---
-====
-endif::[]
 
 The above command should return you three sub-routes for the main `greeter` route:
 
@@ -176,12 +170,27 @@ The above command should return you three sub-routes for the main `greeter` rout
 
 You will notice that the command does not create any new configuration/revision/deployment as there was no application update (e.g. image tag, env var, etc), but when you call the service, Knative scales up the `greeter-v1` and the service responds with the text **Hi  greeter => '9861675f8845' : 1**.
 
+[.console-input]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ *$BOOK_HOME/bin/call.sh*
-Hi  greeter => '9861675f8845' : 1
+$BOOK_HOME/bin/call.sh
+----
 
-$ *kubectl get pods*
+[.console-output]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+Hi  greeter => '9861675f8845' : 1
+----
+
+[.console-input]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
+kubectl get pods
+----
+
+[.console-output]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME                                     READY   STATUS    AGE
 greeter-v1-deployment-6f75dfd9d8-s5bvr   2/2     Running   5s
 ----
@@ -238,22 +247,25 @@ spec:
 To roll out the greeter canary deployment use the following command:
 
 .Create greeter canary Deployment
+[.console-input]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ *kubectl -n {tutorial-namespace} apply -f service-canary.yaml*
+kubectl -n {tutorial-namespace} apply -f service-canary.yaml
 ----
 
 As in the previous section on <<blue-green>> deployments, the command will not create any new configuration/revision/deployment. To observe the traffic distribution you need to run the script `$BOOK_HOME/bin/poll.sh`, which is almost identical to `$BOOK_HOME/bin/call.sh` but will invoke the Knative service in a loop.
 
 .Verify Canary rollout
+[.console-input]
 [source,bash,subs="quotes,attributes+,+macros"]
 ----
-$ *$BOOK_HOME/bin/poll.sh*
+$BOOK_HOME/bin/poll.sh
 ----
 
 With the poll.sh script running you will see that approximately 80% of the responses are returned from `greeter-v1` and approximately 20% from `greeter-v2`. See the listing below for sample output:
 
 .Sample greeter Canary roll out output
+[.console-output]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
 Hi  greeter => '9861675f8845' : 1
@@ -279,9 +291,15 @@ Hi  greeter => '9861675f8845' : 16
 
 You should also notice that two pods are running representing both `greeter-v1` and `greeter-v2`:
 
+[.console-input]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-$ *watch kubectl get pods*
+watch kubectl get pods
+----
+
+[.console-output]
+[source,bash,subs="+quotes,+attributes,+macros"]
+----
 NAME                                     READY   STATUS    AGE
 greeter-v1-deployment-6f75dfd9d8-86q89   2/2     Running   12s
 greeter-v2-deployment-9984bb56d-n7xvm    2/2     Running   2s
@@ -294,30 +312,10 @@ As a challenge, adjust the traffic distribution and observe the responses while 
 
 [#basics-cleanup]
 == Cleanup
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
 [#basics-run-cleanup]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter
 ----
-copyToClipboard::basics-run-cleanup[]
---
-oc::
-+
---
-endif::[]
-[#basics-run-oc-cleanup]
-[source,bash,subs="+macros,+attributes"]
-----
-oc -n {tutorial-namespace} delete services.serving.knative.dev greeter
-----
-copyToClipboard::basics-run-oc-cleanup[]
-ifndef::workshop[]
---
-====
-endif::[]
+
