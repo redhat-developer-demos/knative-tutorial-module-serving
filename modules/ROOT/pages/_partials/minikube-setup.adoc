@@ -77,8 +77,6 @@ kubectl api-resources --api-group='messaging.knative.dev'
 NAME               SHORTNAMES   APIGROUP                NAMESPACED   KIND
 channels           ch           messaging.knative.dev   true         Channel
 inmemorychannels   imc          messaging.knative.dev   true         InMemoryChannel
-parallels                       messaging.knative.dev   true         Parallel
-sequences                       messaging.knative.dev   true         Sequence
 subscriptions      sub          messaging.knative.dev   true         Subscription
 ----
 
@@ -106,11 +104,11 @@ kubectl api-resources --api-group='sources.knative.dev'
 [.console-output]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-NAME               SHORTNAMES   APIGROUP                       NAMESPACED   KIND
-apiserversources                sources.eventing.knative.dev   true         ApiServerSource
-containersources                sources.eventing.knative.dev   true         ContainerSource
-cronjobsources                  sources.eventing.knative.dev   true         CronJobSource
-sinkbindings                    sources.eventing.knative.dev   true         SinkBinding
+NAME               SHORTNAMES   APIGROUP              NAMESPACED   KIND
+apiserversources                sources.knative.dev   true         ApiServerSource
+containersources                sources.knative.dev   true         ContainerSource
+pingsources                     sources.knative.dev   true         PingSource
+sinkbindings                    sources.knative.dev   true         SinkBinding
 ----
 
 .sources.knative.dev
@@ -121,9 +119,12 @@ kubectl api-resources --api-group='sources.knative.dev'
 ----
 
 [source,bash,subs="+quotes,+attributes,+macros"]
+[.console-output]
 ----
 NAME               SHORTNAMES   APIGROUP              NAMESPACED   KIND
 apiserversources                sources.knative.dev   true         ApiServerSource
+containersources                sources.knative.dev   true         ContainerSource
+pingsources                     sources.knative.dev   true         PingSource
 sinkbindings                    sources.knative.dev   true         SinkBinding
 ----
 
@@ -145,7 +146,7 @@ This process will take few minutes for the Knative Serving pods to be up and run
 [.console-input]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-watch kubectl get pods -n knative-serving
+watch "kubectl get pods -n knative-serving"
 ----
 
 [.console-output]
@@ -165,14 +166,14 @@ webhook-59585cb6-wqldc        1/1     Running   0          11m
 ----
 kubectl apply \
   --filename \
-    https://raw.githubusercontent.com/knative/serving/{knative-serving-version}/third_party/kourier-latest/kourier.yaml
+    https://github.com/knative/net-kourier/releases/download/{knative-serving-version}/kourier.yaml
 ----
 
 .Kourier pods
 [.console-input]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-watch kubectl get pods -n kourier-system
+watch "kubectl get pods -n kourier-system"
 ----
 
 [.console-output]
@@ -201,8 +202,6 @@ kubectl patch configmap/config-network \
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl apply \
-  --selector \
-  networking.knative.dev/certificate-provider!=cert-manager \
   --filename \
   {knative-eventing-repo}/{knative-eventing-version}/eventing.yaml
 ----
@@ -214,7 +213,7 @@ Like Knative Serving deployment, Knative Eventing deployment will also take few 
 [.console-input]
 [source,bash,subs="+quotes,+attributes,+macros"]
 ----
-watch kubectl get pods -n knative-eventing
+watch "kubectl get pods -n knative-eventing"
 ----
 [.console-output]
 [source,bash,subs="+quotes,+attributes,+macros"]
