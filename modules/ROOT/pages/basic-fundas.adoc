@@ -24,11 +24,11 @@ endif::[]
 Navigate to the tutorial chapter's folder {basics-repo}:
 
 [#basics-nav-folder]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 cd $TUTORIAL_HOME/{basics-repo}
 ----
-copyToClipboard::basics-nav-folder[]
 
 The following snippet shows what a Knative service YAML looks like:
 
@@ -39,41 +39,19 @@ include::ROOT:example${basics-repo}/{service-file}[]
 ----
 
 The service can be deployed using the following command:
- 
-:doc-sec: basics-rev1-deploy
+
 :url: {github-repo}/{basics-repo}/knative/{service-file}
 :url-alt-text: {service-file}
 include::ROOT:partial$deploy-knative-resources.adoc[]
 
 After successful deployment of the service we should see a Kubernetes Deployment named similar to `greeter-nsrbr-deployment` available:
 
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
 [#basics-run-get-deployments]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl get deployments -n {tutorial-namespace}
 ----
-copyToClipboard::basics-run-get-deployments[]
---
-oc::
-+
---
-endif::[]
-[#basics-run-oc-get-deployments]
-[source,bash,linenums,subs="+macros,+attributes"]
-----
-oc get deployments -n {tutorial-namespace}
-----
-copyToClipboard::basics-run-oc-get-deployments[]
-ifndef::workshop[]
---
-====
-endif::[]
 
 [NOTE]
 ====
@@ -88,30 +66,27 @@ ifndef::workshop[]
 Kubernetes::
 +
 --
-:k8s-env: minikube
-:k8s-cli: kubectl
-:doc-sec: bis
 include::ROOT:partial$invoke-service.adoc[tags=**;!workshop-call;!workshop-call-params]
 --
 OpenShift::
 +
 --
-:k8s-env: openshift
-:k8s-cli: oc
-:doc-sec: bis
 include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
 --
 ====
 endif::[]
 
 ifdef::workshop[]
-:k8s-env: openshift
-:k8s-cli: oc
-:doc-sec: bis-01
 include::ROOT:partial$invoke-service.adoc[tag=workshop-call]
 endif::[]
 
-The `http` command should return a response containing a line similar to **Hi  greeter => '6fee83923a9f' : 1**
+The `http` command should return a response containing a line similar to:
+
+[source,bash]
+[.console-output]
+----
+Hi  greeter => '6fee83923a9f' : 1
+----
 
 NOTE: Sometimes the response might not be returned immediately especially when the pod is coming up from dormant state. In that case, repeat service invocation.
 
@@ -199,34 +174,19 @@ Now if you list revisions, you will see two of them, named similar to `greeter-v
 :doc-sec: rev2
 include::partial$knative-objects.adoc[tag=knative-revisions]
 
-<<basics-invoke-service,Invoking Service>> will now show an output like **Namaste  greeter => '6fee83923a9f' : 1**, where __Namaste__ is the value we configured via environment variable in the Knative service resource file.
+<<basics-invoke-service,Invoking Service>> will now show an output like:
+[source,bash,subs="+macros,+attributes"]
+[.console-output]
+----
+Namaste  greeter => '6fee83923a9f' : 1**
+----
+Where __Namaste__ is the value we configured via environment variable in the Knative service resource file.
 
 [#basics-cleanup]
 == Cleanup
-ifndef::workshop[]
-[tabs]
-====
-kubectl::
-+
---
 [#basics-run-cleanup]
+[.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
 kubectl -n {tutorial-namespace} delete services.serving.knative.dev greeter
 ----
-copyToClipboard::basics-run-cleanup[]
---
-oc::
-+
---
-endif::[]
-[#basics-run-oc-cleanup]
-[source,bash,subs="+macros,+attributes"]
-----
-oc -n {tutorial-namespace} delete services.serving.knative.dev greeter
-----
-copyToClipboard::basics-run-oc-cleanup[]
-ifndef::workshop[]
---
-====
-endif::[]
