@@ -3,7 +3,7 @@
 [.console-input]
 [source,bash,subs="+macros,+attributes"]
 ----
-IP_ADDRESS="$(minikube ip):$(kubectl get svc kourier-external --namespace kourier-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
+IP_ADDRESS="$(minikube ip):$(kubectl get svc kourier --namespace kourier-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
 ----
 
 #end::env[]
