@@ -114,7 +114,6 @@ include::ROOT:example$scaling/{service-file}[]
 
 The Knative service definition above will allow each service pod to handle max of 10 in-flight requests per pod (configured via `autoscaling.knative.dev/target` annotation) before automatically scaling to new pod(s)
 
-ifdef::workshop[]
 Navigate to the tutorial chapter's `basics` folder:
 
 [#scaling-navigate-back]
@@ -123,7 +122,6 @@ Navigate to the tutorial chapter's `basics` folder:
 ----
 cd $TUTORIAL_HOME/{scaling-repo}
 ----
-endif::[]
 
 [#scaling-autoscaling-deploy-service]
 === Deploy service 
@@ -163,7 +161,6 @@ hey -c 50 -z 10s \
 OpenShift::
 +
 --
-endif::[]
 [#oc-scaling-run-siege]
 [.console-input]
 [source,bash,subs="attributes+,+macros",linenums]
